@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Touch Grass Clicker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap');
+
+  :root {
+    --green: #4CAF50;
+    --dark-green: #2E7D32;
+    --light-green: #A5D6A7;
+    --sky: #87CEEB;
+    --ground: #8B6914;
+    --text-light: #F1F8E9;
+    --ui-bg: rgba(0,0,0,0.75);
+    --ui-border: rgba(255,255,255,0.15);
+    --gold: #FFD700;
+    --pixel: 'Press Start 2P', monospace;
+    --main: 'Nunito', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--main);
+    background: #1a1a2e;
+    color: var(--text-light);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+    font-size: 16px;
+  }
+
+  /* ===== ÉCRANS ===== */
+  .screen { display: none; width: 100%; height: 100vh; position: absolute; top: 0; left: 0; }
+  .screen.active { display: flex; }
+
+  /* ===== ÉCRAN INTRO ===== */
+  #screen-intro {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 60%, #1b2a1b 100%);
+    padding: 20px;
+    overflow-y: auto;
+  }
+  #screen-intro .story-box {
+    max-width: 700px;
+    background: rgba(0,0,0,0.6);
+    border: 2px solid var(--green);
+    border-radius: 16px;
+    padding: 32px 36px;
+    text-align: center;
+  }
+  .story-title {
+    font-family: var(--pixel);
+    font-size: 11px;
+    color: var(--green);
+    margin-bottom: 24px;
+    line-height: 1.8;
+    text-shadow: 0 0 20px rgba(76,175,80,0.8);
+  }
+  .story-text {
+    font-size: 17px;
+    line-height: 1.9;
+    color: #ddd;
+    margin-bottom: 28px;
+  }
+  .story-text em {
+    color: var(--light-green);
+    font-style: normal;
+    font-weight: 700;
+  }
+  .btn-start {
+    font-family: var(--pixel);
+    font-size: 10px;
+    background: var(--dark-green);
+    color: #fff;
+    border: 2px solid var(--green);
+    padding: 14px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-shadow: none;
+    box-shadow: 0 4px 20px rgba(76,175,80,0.4);
+  }
+  .btn-start:hover { background: var(--green); transform: scale(1.05); }
+
+  /* ===== MENU PRINCIPAL ===== */
+  #screen-menu {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: linear-gradient(180deg, #1a2a3a 0%, #0d1a0d 100%);
+  }
+  .menu-title {
+    font-family: var(--pixel);
+    font-size: clamp(13px, 3vw, 22px);
+    color: var(--green);
+    text-shadow: 0 0 30px rgba(76,175,80,0.9);
+    text-align: center;
+    line-height: 2;
+    margin-bottom: 16px;
+  }
+  .splash-text {
+    position: absolute;
+    top: 2px;
+    left: calc(100% + 10px);
+    color: #FFD700;
+    font-family: var(--pixel);
+    font-size: 8px;
+    max-width: 160px;
+    line-height: 1.7;
+    text-shadow: 0 0 12px rgba(255,215,0,0.9), 0 0 24px rgba(255,215,0,0.4);
+    animation: splashpulse 2.8s ease-in-out infinite;
+    transform-origin: left center;
+    pointer-events: none;
+    white-space: normal;
+  }
+  @keyframes splashpulse {
+    0%   { transform: rotate(-12deg) scale(0.92); }
+    25%  { transform: rotate(-6deg)  scale(1.12); }
+    50%  { transform: rotate(-14deg) scale(0.95); }
+    75%  { transform: rotate(-4deg)  scale(1.08); }
+    100% { transform: rotate(-12deg) scale(0.92); }
+  }
+
+  /* ===== EMOJIS EN ARRIÈRE-PLAN MENU ===== */
+  #menu-bg-emojis {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .menu-emoji {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    animation-fill-mode: both;
+  }
+
+  #screen-menu {
+    position: relative;
+  }
+  #screen-menu > *:not(#menu-bg-emojis) {
+    position: relative;
+    z-index: 1;
+  }
+  @keyframes menufall-a {
+    0%   { top: -80px; opacity: 0; transform: rotate(0deg) scale(1); }
+    8%   { opacity: 0.7; }
+    90%  { opacity: 0.5; }
+    100% { top: 110vh; opacity: 0; transform: rotate(360deg) scale(0.8); }
+  }
+  @keyframes menufall-b {
+    0%   { top: -80px; opacity: 0; transform: rotate(0deg) scale(1); }
+    8%   { opacity: 0.55; }
+    50%  { transform: rotate(-200deg) scale(1.1); opacity: 0.55; }
+    100% { top: 110vh; opacity: 0; transform: rotate(-400deg) scale(0.6); }
+  }
+  @keyframes menufall-c {
+    0%   { top: -80px; opacity: 0; transform: rotate(15deg) scale(1); }
+    8%   { opacity: 0.6; }
+    30%  { transform: rotate(-15deg) scale(1.2); }
+    60%  { transform: rotate(25deg) scale(0.9); }
+    100% { top: 110vh; opacity: 0; transform: rotate(-30deg) scale(0.7); }
+  }
+  @keyframes menufall-d {
+    0%   { top: -80px; opacity: 0; transform: translateX(0) scale(1); }
+    8%   { opacity: 0.65; }
+    25%  { transform: translateX(30px) scale(1.1); }
+    50%  { transform: translateX(-20px) scale(0.95); }
+    75%  { transform: translateX(15px) scale(1.05); }
+    100% { top: 110vh; opacity: 0; transform: translateX(0) scale(0.8); }
+  }
+  @keyframes menufall-e {
+    0%   { top: -80px; opacity: 0; transform: rotate(0deg) scale(1.3); }
+    8%   { opacity: 0.8; }
+    100% { top: 110vh; opacity: 0; transform: rotate(180deg) scale(0.5); }
+  }
+
+  .menu-subtitle {
+    font-size: 16px;
+    color: #aaa;
+    margin-top: -12px;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  .menu-grass-deco {
+    font-size: 52px;
+    margin-bottom: 8px;
+  }
+  .menu-btn {
+    font-family: var(--pixel);
+    font-size: 10px;
+    width: 280px;
+    padding: 16px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .menu-btn.play { background: var(--dark-green); border-color: var(--green); color: #fff; box-shadow: 0 4px 20px rgba(76,175,80,0.4); }
+  .menu-btn.play:hover { background: var(--green); transform: scale(1.04); }
+  .menu-btn.saves { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.4); color: var(--gold); }
+  .menu-btn.saves:hover { background: rgba(255,215,0,0.18); transform: scale(1.04); }
+  .menu-btn.settings { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); color: #ccc; }
+  .menu-btn.settings:hover { background: rgba(255,255,255,0.12); }
+  .menu-btn.credits { background: rgba(100,100,255,0.07); border-color: rgba(100,100,255,0.3); color: #aab; }
+  .menu-btn.credits:hover { background: rgba(100,100,255,0.15); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #12201a;
+    border: 2px solid var(--green);
+    border-radius: 16px;
+    padding: 32px;
+    min-width: 340px;
+    max-width: 500px;
+    width: 92vw;
+  }
+  .modal-title {
+    font-family: var(--pixel);
+    font-size: 11px;
+    color: var(--green);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .modal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 15px;
+    color: #ccc;
+  }
+  .modal-row select, .modal-row input[type=range] {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: var(--main);
+    font-size: 14px;
+  }
+  .modal-close {
+    margin-top: 20px;
+    width: 100%;
+    font-family: var(--pixel);
+    font-size: 10px;
+    padding: 12px;
+    background: var(--dark-green);
+    border: 2px solid var(--green);
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .modal-close:hover { background: var(--green); }
+  .credits-text { font-size: 15px; color: #ccc; line-height: 2; text-align: center; }
+  .credits-text strong { color: var(--green); }
+
+  /* ===== MODAL NOUVELLE PARTIE ===== */
+  #modal-newgame .modal-box {
+    border-color: var(--gold);
+    background: #1a1808;
+  }
+  #modal-newgame .modal-title { color: var(--gold); }
+  .newgame-input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 8px;
+    color: #fff;
+    font-family: var(--main);
+    font-size: 16px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .newgame-input:focus { border-color: var(--gold); }
+  .newgame-input::placeholder { color: #666; }
+  .newgame-label {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .btn-newgame-start {
+    width: 100%;
+    font-family: var(--pixel);
+    font-size: 10px;
+    padding: 14px;
+    background: #7a6200;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .btn-newgame-start:hover { background: #a08000; }
+
+  /* ===== MODAL SAUVEGRADES ===== */
+  #modal-saves .modal-box {
+    border-color: var(--gold);
+    background: #0e1825;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  #modal-saves .modal-title { color: var(--gold); font-size: 10px; }
+  .save-slot {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .save-slot-info { flex: 1; }
+  .save-slot-name {
+    font-family: var(--pixel);
+    font-size: 9px;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .save-slot-pseudo {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 3px;
+  }
+  .save-slot-details {
+    font-size: 12px;
+    color: #777;
+  }
+  .save-slot-btns { display: flex; flex-direction: column; gap: 6px; }
+  .btn-load-save {
+    font-family: var(--pixel);
+    font-size: 8px;
+    padding: 7px 12px;
+    background: var(--dark-green);
+    border: 1px solid var(--green);
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .btn-load-save:hover { background: var(--green); }
+  .btn-del-save {
+    font-family: var(--pixel);
+    font-size: 8px;
+    padding: 7px 12px;
+    background: rgba(180,30,30,0.3);
+    border: 1px solid rgba(220,50,50,0.5);
+    color: #ff8888;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .btn-del-save:hover { background: rgba(220,50,50,0.5); color: #fff; }
+  .saves-empty {
+    text-align: center;
+    font-size: 15px;
+    color: #666;
+    padding: 30px 0;
+    font-style: italic;
+  }
+
+  /* ===== MODAL PAUSE ===== */
+  #modal-pause .modal-box {
+    border-color: #888;
+    background: #111820;
+    text-align: center;
+  }
+  #modal-pause .modal-title { color: #ccc; }
+  .pause-btn {
+    width: 100%;
+    font-family: var(--pixel);
+    font-size: 10px;
+    padding: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+  }
+  .pause-btn.resume { background: var(--dark-green); border-color: var(--green); color: #fff; }
+  .pause-btn.resume:hover { background: var(--green); }
+  .pause-btn.save-and-continue { background: rgba(255,215,0,0.1); border-color: var(--gold); color: var(--gold); }
+  .pause-btn.save-and-continue:hover { background: rgba(255,215,0,0.25); }
+  .pause-btn.save-and-quit { background: rgba(255,140,0,0.1); border-color: #ff8c00; color: #ff8c00; }
+  .pause-btn.save-and-quit:hover { background: rgba(255,140,0,0.25); }
+  .pause-btn.quit { background: rgba(180,30,30,0.15); border-color: rgba(220,50,50,0.5); color: #ff8888; margin-bottom: 0; }
+  .pause-btn.quit:hover { background: rgba(220,50,50,0.3); }
+  .pause-save-name {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  /* ===== JEU PRINCIPAL ===== */
+  #screen-game {
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Fond du jeu */
+  #game-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .bg-sky {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 55%;
+    background: linear-gradient(180deg, #4a90d9 0%, #87CEEB 70%, #b0d8f0 100%);
+  }
+  .bg-cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50px;
+  }
+  .bg-ground-strip {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 45%;
+    background: linear-gradient(180deg, #5a9e30 0%, #3d7a20 30%, #7a5522 60%, #5c3d10 100%);
+  }
+  .bg-bird {
+    position: absolute;
+    font-size: 18px;
+    animation: flybird 18s linear infinite;
+  }
+  @keyframes flybird { from { left: -40px; top: 15%; } to { left: 110%; top: 10%; } }
+
+  /* Touffe d'herbe */
+  #grass-container {
+    position: absolute;
+    bottom: 28%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    cursor: crosshair;
+    width: 200px;
+    height: 180px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  #grass-svg {
+    width: 200px;
+    height: 180px;
+    transition: filter 0.1s;
+    filter: drop-shadow(0 8px 20px rgba(50,160,50,0.5));
+  }
+  #grass-container:hover #grass-svg {
+    filter: drop-shadow(0 8px 30px rgba(80,200,80,0.8)) brightness(1.1);
+  }
+  .grass-blade {
+    transform-origin: bottom center;
+    transition: transform 0.15s cubic-bezier(.17,.67,.83,.67);
+  }
+  .ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(100,220,100,0.3);
+    pointer-events: none;
+    animation: ripple 0.5s ease-out forwards;
+  }
+  @keyframes ripple {
+    from { width: 10px; height: 10px; opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    to { width: 80px; height: 80px; opacity: 0; transform: translate(-50%,-50%) scale(1); }
+  }
+  .float-text {
+    position: absolute;
+    font-family: var(--pixel);
+    font-size: 10px;
+    color: var(--gold);
+    pointer-events: none;
+    animation: floatup 1s ease-out forwards;
+    z-index: 50;
+    white-space: nowrap;
+  }
+  @keyframes floatup {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-60px); }
+  }
+
+  /* HUD */
+  #hud {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--ui-bg);
+    border-bottom: 1px solid var(--ui-border);
+    backdrop-filter: blur(6px);
+  }
+  .hud-left { display: flex; align-items: center; gap: 10px; }
+  .hud-title {
+    font-family: var(--pixel);
+    font-size: 8px;
+    color: var(--green);
+    line-height: 1.6;
+  }
+  .hud-player-name {
+    font-size: 13px;
+    color: #aaa;
+    font-style: italic;
+  }
+  .hud-mental {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .hud-pts {
+    font-family: var(--pixel);
+    font-size: clamp(10px, 2vw, 15px);
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255,215,0,0.6);
+  }
+  .hud-pts-label {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 2px;
+  }
+  .hud-pps {
+    font-size: 12px;
+    color: var(--light-green);
+    margin-top: 2px;
+  }
+  .hud-btns { display: flex; gap: 8px; }
+  .hud-btn {
+    font-size: 12px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #ccc;
+    padding: 7px 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--main);
+    font-weight: 700;
+  }
+  .hud-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .hud-btn.shop-btn { border-color: rgba(76,175,80,0.5); color: var(--light-green); }
+  .hud-btn.shop-btn:hover { background: rgba(76,175,80,0.2); }
+
+  /* Onglets boutique */
+  .shop-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(76,175,80,0.2);
+  }
+  .shop-tab {
+    flex: 1;
+    padding: 10px 4px;
+    font-family: var(--pixel);
+    font-size: 7px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+    line-height: 1.6;
+  }
+  .shop-tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .shop-tab:hover:not(.active) { color: #aaa; }
+  .shop-tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 10px; }
+  .shop-tab-content.active { display: flex; }
+
+  /* Jardiland */
+  .jardiland-header {
+    text-align: center;
+    padding: 8px;
+    font-size: 11px;
+    color: #7dc87f;
+    border-bottom: 1px solid rgba(76,175,80,0.15);
+    margin-bottom: 4px;
+    line-height: 1.6;
+  }
+  .plant-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(100,200,100,0.25);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .plant-item:hover:not(.locked) { background: rgba(100,200,100,0.1); border-color: rgba(100,200,100,0.5); }
+  .plant-item.locked { opacity: 0.4; cursor: not-allowed; }
+  .plant-item.maxed { border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.04); }
+  .plant-badge {
+    position: absolute;
+    top: -6px; right: -6px;
+    background: var(--gold);
+    color: #000;
+    font-size: 9px;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .plant-icon-wrap { position: relative; font-size: 30px; flex-shrink: 0; }
+
+  /* Plantes plantées dans le monde */
+  .planted-plant {
+    position: absolute;
+    bottom: 28%;
+    font-size: 36px;
+    cursor: crosshair;
+    z-index: 9;
+    transition: filter 0.15s, transform 0.15s;
+    filter: drop-shadow(0 4px 10px rgba(50,180,50,0.4));
+    user-select: none;
+    animation: plantsway 3s ease-in-out infinite;
+  }
+  .planted-plant:hover {
+    filter: drop-shadow(0 4px 20px rgba(80,220,80,0.8)) brightness(1.15);
+  }
+  .planted-plant.on-cooldown { filter: brightness(0.7); }
+  @keyframes plantsway {
+    0%,100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+  .planted-plant.touched {
+    animation: planttouch 0.2s ease forwards;
+  }
+  @keyframes planttouch {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(-8deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  /* Panneau boutique */
+  #shop-panel {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 320px;
+    background: rgba(5,20,5,0.95);
+    border-left: 1px solid rgba(76,175,80,0.3);
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  #shop-panel.open { transform: translateX(0); }
+  .shop-header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(76,175,80,0.2);
+    font-family: var(--pixel);
+    font-size: 10px;
+    color: var(--green);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .shop-close { cursor: pointer; font-size: 18px; background: none; border: none; color: #aaa; }
+  .shop-close:hover { color: #fff; }
+  .shop-items { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .shop-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(76,175,80,0.2);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .shop-item:hover:not(.locked) { background: rgba(76,175,80,0.1); border-color: rgba(76,175,80,0.5); }
+  .shop-item.locked { opacity: 0.4; cursor: not-allowed; }
+  .shop-item.owned { border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.04); }
+  .shop-icon { font-size: 30px; flex-shrink: 0; }
+  .shop-info { flex: 1; }
+  .shop-name { font-size: 14px; font-weight: 700; color: #eee; }
+  .shop-desc { font-size: 12px; color: #888; margin-top: 3px; line-height: 1.4; }
+  .shop-price { font-family: var(--pixel); font-size: 9px; margin-top: 6px; }
+  .shop-price.can-afford { color: var(--gold); }
+  .shop-price.cant-afford { color: #666; }
+  .shop-count { font-size: 11px; color: var(--light-green); margin-top: 3px; }
+
+  /* Notification */
+  .notif {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dark-green);
+    border: 2px solid var(--green);
+    color: #fff;
+    font-family: var(--pixel);
+    font-size: 9px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    z-index: 200;
+    animation: notifpop 2s ease forwards;
+    white-space: nowrap;
+  }
+  @keyframes notifpop {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    75% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  }
+
+  /* Barre de santé mentale */
+  #mental-bar-container {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    text-align: center;
+  }
+  .mental-label { font-size: 11px; color: #aaa; margin-bottom: 4px; font-family: var(--pixel); }
+  .mental-bar-outer {
+    width: 260px;
+    height: 16px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .mental-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #c62828, #f9a825, #388e3c);
+    border-radius: 8px;
+    transition: width 0.4s ease;
+  }
+  .mental-status {
+    font-size: 12px;
+    color: var(--light-green);
+    margin-top: 4px;
+  }
+
+  /* Sunshine */
+  .sunshine {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 15% 10%, rgba(255,230,100,0.15), transparent 60%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s;
+    z-index: 1;
+  }
+
+  #grass-container.on-cooldown #grass-svg {
+    filter: drop-shadow(0 8px 20px rgba(50,160,50,0.5)) brightness(0.88);
+  }
+
+  /* ===== ÉVÉNEMENTS ===== */
+  .event-notif {
+    position: fixed;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    z-index: 300;
+    border-radius: 12px;
+    padding: 16px 24px 14px;
+    font-family: var(--pixel);
+    font-size: 9px;
+    min-width: 300px;
+    max-width: 440px;
+    text-align: center;
+    line-height: 1.8;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    border: 2px solid;
+  }
+  .event-notif.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  .event-notif.bonus {
+    background: rgba(5,40,10,0.97);
+    border-color: #4CAF50;
+    color: #a5d6a7;
+  }
+  .event-notif.malus {
+    background: rgba(40,5,5,0.97);
+    border-color: #e53935;
+    color: #ef9a9a;
+  }
+  .event-notif .event-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+  .event-notif .event-title { color: #fff; font-size: 10px; display: block; margin-bottom: 4px; }
+  .event-notif .event-effect { font-size: 8px; }
+
+  /* ===== BONUS QUI TOMBENT ===== */
+  .falling-blade {
+    position: fixed;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 60;
+    font-size: 36px;
+    animation: falling linear forwards;
+    transform-origin: center;
+    filter: drop-shadow(0 2px 8px rgba(50,180,50,0.7));
+    transition: transform 0.1s, filter 0.1s;
+    user-select: none;
+  }
+  .falling-blade:hover {
+    filter: drop-shadow(0 2px 20px rgba(100,255,100,0.95)) brightness(1.4);
+    transform: scale(1.3) rotate(var(--rot)) !important;
+  }
+  .falling-blade.golden {
+    font-size: 48px;
+    filter: drop-shadow(0 2px 16px rgba(255,215,0,0.95));
+    animation: falling-gold linear forwards;
+  }
+  @keyframes falling {
+    0%   { top: -50px; opacity: 0; transform: rotate(var(--rot)) scale(1); }
+    8%   { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 105vh; opacity: 0; transform: rotate(calc(var(--rot) + 360deg)) scale(0.8); }
+  }
+  @keyframes falling-gold {
+    0%   { top: -60px; opacity: 0; transform: rotate(var(--rot)) scale(1.3); }
+    8%   { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 105vh; opacity: 0; transform: rotate(calc(var(--rot) + 720deg)) scale(0.9); }
+  }
+  .blade-caught {
+    animation: bladecatch 0.4s ease forwards !important;
+  }
+  @keyframes bladecatch {
+    0%   { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(3); opacity: 0; }
+  }
+
+  /* Écran de victoire */
+  #screen-win {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #1a2e1a 0%, #0d1a0d 100%);
+    text-align: center;
+    padding: 30px;
+  }
+  .win-title {
+    font-family: var(--pixel);
+    font-size: clamp(10px, 2vw, 15px);
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(255,215,0,0.8);
+    margin-bottom: 16px;
+    line-height: 2;
+  }
+  .win-text { font-size: 17px; color: #ccc; max-width: 500px; margin: 0 auto 24px; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN INTRO -->
+<div id="screen-intro" class="screen active">
+  <div class="story-box">
+    <div class="story-title">🌿 TOUCH GRASS CLICKER 🌿<br>— Une histoire de rédemption —</div>
+    <div class="story-text">
+      Tu as passé <em>ta vie entière</em> vissé sur ta chaise gaming.<br>
+      League of Legends. Discord. Modérer des serveurs à 3h du mat.<br>
+      Ta chaise et toi ne faites plus qu'un. Littéralement.<br><br>
+      Un jour, ta maman entre dans ta chambre, une main sur le nez :<br>
+      <em>« Mon chéri… tu… tu sens mauvais. Sors un peu. Va toucher de l'herbe. »</em><br><br>
+      Et là, comme dans un rêve, tu pousses la porte de ta maison.<br>
+      Le soleil te brûle les yeux. Les oiseaux chantent. Et tu vois…<br><br>
+      <em>🌿 La touffe d'herbe parfaite. 🌿</em><br>
+      Fraîche. Verte. Elle t'appelle.<br><br>
+      Tu tends la main. Tu la caresses.<br>
+      <em>Quelque chose se réveille en toi.</em>
+    </div>
+    <button class="btn-start" onclick="showScreen('menu')">▶ COMMENCER L'AVENTURE</button>
+  </div>
+</div>
+
+<!-- MENU PRINCIPAL -->
+<div id="screen-menu" class="screen">
+  <div id="menu-bg-emojis"></div>
+  <div class="menu-grass-deco">🌿🌿🌿</div>
+  <div style="position:relative;display:inline-block;">
+    <div class="menu-title">TOUCH GRASS<br>CLICKER</div>
+    <div class="splash-text" id="splash-text"></div>
+  </div>
+  <div class="menu-subtitle">™ Natural Bots Studio</div>
+  <button class="menu-btn play" onclick="openNewGameModal()">▶ NOUVELLE PARTIE</button>
+  <button class="menu-btn saves" onclick="openModal('saves')">💾 SAUVEGARDES</button>
+  <button class="menu-btn settings" onclick="openModal('settings')">⚙ PARAMÈTRES</button>
+  <button class="menu-btn credits" onclick="openModal('credits')">★ CRÉDITS</button>
+</div>
+
+<!-- JEU -->
+<div id="screen-game" class="screen">
+
+  <!-- Fond -->
+  <div id="game-bg">
+    <div class="bg-sky"></div>
+    <div class="bg-sun" style="position:absolute;top:8%;left:10%;width:60px;height:60px;background:radial-gradient(circle,#FFE566 60%,rgba(255,220,50,0) 100%);border-radius:50%;box-shadow:0 0 40px 15px rgba(255,220,50,0.3);"></div>
+    <div class="bg-bird" style="animation-delay:-5s">🐦</div>
+    <div class="bg-bird" style="animation-delay:-12s; font-size:13px">🐦</div>
+
+    <!-- Nuages -->
+    <div class="bg-cloud" style="top:8%;left:15%;width:120px;height:36px;opacity:0.9"></div>
+    <div class="bg-cloud" style="top:6%;left:13%;width:70px;height:24px;opacity:0.9"></div>
+    <div class="bg-cloud" style="top:15%;left:55%;width:100px;height:32px;opacity:0.85"></div>
+    <div class="bg-cloud" style="top:13%;left:52%;width:60px;height:22px;opacity:0.85"></div>
+    <div class="bg-cloud" style="top:20%;right:10%;width:80px;height:28px;opacity:0.8"></div>
+
+    <div class="bg-ground-strip"></div>
+
+    <!-- Clôture SVG -->
+    <svg style="position:absolute;bottom:42%;left:0;right:0;width:100%;height:60px" viewBox="0 0 1000 60" preserveAspectRatio="none">
+      <rect x="0" y="12" width="1000" height="8" fill="#c8a26a" rx="2"/>
+      <rect x="0" y="30" width="1000" height="8" fill="#c8a26a" rx="2"/>
+      <g fill="#d4aa75">
+        <rect x="0" y="0" width="14" height="50" rx="2"/><rect x="40" y="0" width="14" height="50" rx="2"/>
+        <rect x="80" y="0" width="14" height="50" rx="2"/><rect x="120" y="0" width="14" height="50" rx="2"/>
+        <rect x="160" y="0" width="14" height="50" rx="2"/><rect x="200" y="0" width="14" height="50" rx="2"/>
+        <rect x="240" y="0" width="14" height="50" rx="2"/><rect x="280" y="0" width="14" height="50" rx="2"/>
+        <rect x="320" y="0" width="14" height="50" rx="2"/><rect x="360" y="0" width="14" height="50" rx="2"/>
+        <rect x="400" y="0" width="14" height="50" rx="2"/><rect x="440" y="0" width="14" height="50" rx="2"/>
+        <rect x="480" y="0" width="14" height="50" rx="2"/><rect x="520" y="0" width="14" height="50" rx="2"/>
+        <rect x="560" y="0" width="14" height="50" rx="2"/><rect x="600" y="0" width="14" height="50" rx="2"/>
+        <rect x="640" y="0" width="14" height="50" rx="2"/><rect x="680" y="0" width="14" height="50" rx="2"/>
+        <rect x="720" y="0" width="14" height="50" rx="2"/><rect x="760" y="0" width="14" height="50" rx="2"/>
+        <rect x="800" y="0" width="14" height="50" rx="2"/><rect x="840" y="0" width="14" height="50" rx="2"/>
+        <rect x="880" y="0" width="14" height="50" rx="2"/><rect x="920" y="0" width="14" height="50" rx="2"/>
+        <rect x="960" y="0" width="14" height="50" rx="2"/>
+      </g>
+    </svg>
+
+    <!-- Maison SVG -->
+    <svg viewBox="0 0 120 100" style="position:absolute;right:8%;bottom:42%;width:120px;height:100px">
+      <rect x="10" y="50" width="100" height="50" fill="#e8d5b7"/>
+      <rect x="10" y="50" width="100" height="50" fill="none" stroke="#a08060" stroke-width="1"/>
+      <polygon points="5,52 60,10 115,52" fill="#c0392b"/>
+      <polygon points="5,52 60,10 115,52" fill="none" stroke="#922b21" stroke-width="1"/>
+      <rect x="20" y="60" width="28" height="24" fill="#87CEEB" stroke="#a08060" stroke-width="1"/>
+      <line x1="34" y1="60" x2="34" y2="84" stroke="#a08060" stroke-width="0.8"/>
+      <line x1="20" y1="72" x2="48" y2="72" stroke="#a08060" stroke-width="0.8"/>
+      <rect x="74" y="66" width="28" height="34" rx="3" fill="#8B4513" stroke="#5c2a00" stroke-width="1"/>
+      <circle cx="96" cy="83" r="2" fill="#FFD700"/>
+      <rect x="75" y="18" width="16" height="22" fill="#c0392b" stroke="#922b21" stroke-width="0.8"/>
+    </svg>
+
+    <!-- Arbres -->
+    <svg style="position:absolute;bottom:42%;left:3%;width:70px;height:120px" viewBox="0 0 70 120">
+      <rect x="28" y="80" width="14" height="40" fill="#7a5522"/>
+      <ellipse cx="35" cy="60" rx="30" ry="40" fill="#2d8a20"/>
+      <ellipse cx="35" cy="45" rx="22" ry="30" fill="#38a829"/>
+    </svg>
+    <svg style="position:absolute;bottom:42%;left:18%;width:50px;height:90px" viewBox="0 0 50 90">
+      <rect x="20" y="60" width="10" height="30" fill="#7a5522"/>
+      <ellipse cx="25" cy="45" rx="20" ry="28" fill="#33952a"/>
+    </svg>
+
+    <div class="sunshine" id="sunshine"></div>
+  </div>
+
+  <!-- Touffe d'herbe -->
+  <div id="grass-container">
+    <svg id="grass-svg" viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="172" rx="55" ry="8" fill="rgba(0,0,0,0.25)"/>
+      <ellipse cx="100" cy="170" rx="50" ry="10" fill="#5a4020"/>
+      <path class="grass-blade" d="M72,165 Q65,120 60,90 Q58,80 62,85 Q70,110 78,160" fill="#1a6b12"/>
+      <path class="grass-blade" d="M130,165 Q137,118 142,88 Q145,78 140,83 Q132,108 124,162" fill="#1a6b12"/>
+      <path class="grass-blade" d="M100,164 Q98,115 96,80 Q95,68 100,73 Q105,90 104,162" fill="#1a6b12"/>
+      <path class="grass-blade" d="M115,163 Q118,112 122,78 Q124,66 119,72 Q113,95 111,162" fill="#1a6b12"/>
+      <path class="grass-blade" d="M87,163 Q83,115 78,82 Q76,70 82,75 Q88,98 91,162" fill="#1a6b12"/>
+      <path class="grass-blade" d="M78,166 Q72,130 68,100 Q66,88 71,93 Q80,118 85,163" fill="#2d9e20"/>
+      <path class="grass-blade" d="M122,166 Q128,128 134,97 Q136,86 131,91 Q122,116 116,164" fill="#2d9e20"/>
+      <path class="grass-blade" d="M100,165 Q102,125 106,92 Q108,80 103,85 Q97,110 96,163" fill="#2d9e20"/>
+      <path class="grass-blade" d="M90,165 Q87,128 82,97 Q80,85 85,90 Q93,115 95,163" fill="#2d9e20"/>
+      <path class="grass-blade" d="M110,165 Q113,127 118,94 Q120,83 115,88 Q107,114 105,163" fill="#2d9e20"/>
+      <path class="grass-blade" d="M85,167 Q80,138 76,112 Q74,100 79,106 Q88,130 92,165" fill="#3ec42e"/>
+      <path class="grass-blade" d="M115,167 Q120,136 126,110 Q128,98 122,104 Q113,128 109,165" fill="#3ec42e"/>
+      <path class="grass-blade" d="M100,167 Q100,138 100,110 Q100,98 103,104 Q104,130 102,165" fill="#3ec42e"/>
+      <path class="grass-blade" d="M92,167 Q89,140 86,115 Q84,103 89,108 Q96,132 97,165" fill="#3ec42e"/>
+      <path class="grass-blade" d="M108,167 Q111,138 116,112 Q118,100 113,106 Q106,130 105,165" fill="#3ec42e"/>
+      <path class="grass-blade" d="M96,168 Q93,148 90,130 Q88,122 92,127 Q98,144 100,167" fill="#5cd648"/>
+      <path class="grass-blade" d="M104,168 Q107,146 111,128 Q113,120 108,126 Q102,143 101,167" fill="#5cd648"/>
+      <path class="grass-blade" d="M100,168 Q100,148 100,128 Q100,118 102,124 Q102,144 101,167" fill="#5cd648"/>
+      <circle cx="82" cy="145" r="3" fill="#FFE566" opacity="0.8"/>
+      <circle cx="118" cy="138" r="2.5" fill="#FF8FAB" opacity="0.8"/>
+      <circle cx="100" cy="130" r="2" fill="#FFE566" opacity="0.7"/>
+      <ellipse id="grass-hit" cx="100" cy="140" rx="55" ry="45" fill="transparent" cursor="crosshair"/>
+    </svg>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-left">
+      <div>
+        <div class="hud-title">🌿 TOUCH<br>GRASS</div>
+        <div class="hud-player-name" id="hud-player-name"></div>
+      </div>
+    </div>
+    <div class="hud-mental">
+      <div class="hud-pts" id="pts-display">0</div>
+      <div class="hud-pts-label">points de mental</div>
+      <div class="hud-pps" id="pps-display">+0/sec</div>
+    </div>
+    <div class="hud-btns">
+      <button class="hud-btn shop-btn" onclick="toggleShop()">🛒 AMÉLIOS</button>
+      <button class="hud-btn" onclick="openPauseModal()">⏸ PAUSE</button>
+    </div>
+  </div>
+
+  <!-- Barre de santé mentale -->
+  <div id="mental-bar-container">
+    <div class="mental-label">SANTÉ MENTALE</div>
+    <div class="mental-bar-outer">
+      <div class="mental-bar-fill" id="mental-bar" style="width:0%"></div>
+    </div>
+    <div class="mental-status" id="mental-status">Stade 1 : Plissé des yeux face au soleil</div>
+  </div>
+
+  <!-- Panneau boutique -->
+  <div id="shop-panel">
+    <div class="shop-header">
+      <span>🛒 BOUTIQUE</span>
+      <button class="shop-close" onclick="toggleShop()">✕</button>
+    </div>
+    <div class="shop-tabs">
+      <button class="shop-tab active" id="tab-upgrades" onclick="switchShopTab('upgrades')">✋ AMÉLIOS</button>
+      <button class="shop-tab" id="tab-jardiland" onclick="switchShopTab('jardiland')">🌱 JARDILAND</button>
+    </div>
+    <div class="shop-tab-content active" id="tab-content-upgrades">
+      <div id="shop-items-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+    <div class="shop-tab-content" id="tab-content-jardiland">
+      <div class="jardiland-header">🪴 Bienvenue chez <strong style="color:#4CAF50">Jardiland</strong> !<br>Achetez des plantes à caresser pour gagner plus de points.</div>
+      <div id="jardiland-items-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- VICTOIRE -->
+<div id="screen-win" class="screen">
+  <div class="win-title">🎉 TU ES GUÉRI ! 🎉<br>LA LUMIÈRE DU JOUR T'APPARTIENT</div>
+  <div class="win-text">
+    Tu as accumulé assez de points de mental pour rejoindre le monde réel.<br>
+    Ta chaise gaming attendra. L'herbe, elle, est toujours là.<br><br>
+    <em style="color:var(--light-green)">Merci d'avoir joué à Touch Grass Clicker !</em>
+  </div>
+  <button class="btn-start" onclick="showScreen('menu'); resetGame();">▶ REJOUER</button>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- PARAMÈTRES -->
+<div class="modal-overlay" id="modal-settings">
+  <div class="modal-box">
+    <div class="modal-title">⚙ PARAMÈTRES</div>
+    <div class="modal-row">
+      <span>Langue</span>
+      <select id="lang-select">
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇬🇧 English</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <span>Volume 🎵</span>
+      <input type="range" id="volume-range" min="0" max="100" value="70" style="width:120px">
+    </div>
+    <div class="modal-row" style="border:none;font-size:13px;color:#666;justify-content:center">
+      Musique disponible dans une prochaine version !
+    </div>
+    <button class="modal-close" onclick="closeModal('settings')">FERMER</button>
+  </div>
+</div>
+
+<!-- CRÉDITS -->
+<div class="modal-overlay" id="modal-credits">
+  <div class="modal-box">
+    <div class="modal-title">★ CRÉDITS</div>
+    <div class="credits-text">
+      <strong>Touch Grass Clicker</strong><br><br>
+      Développé par<br>
+      <strong>Natural_bots</strong><br><br>
+      © 2026 <strong>Natural Bots Studio</strong>™<br>
+      Tous droits réservés<br><br>
+      <span style="color:#666;font-size:13px">Version Beta 0.2<br>
+      "Pour tous les gamers qui n'ont pas<br>vu la lumière du jour depuis 2018"</span>
+    </div>
+    <button class="modal-close" onclick="closeModal('credits')">FERMER</button>
+  </div>
+</div>
+
+<!-- NOUVELLE PARTIE -->
+<div class="modal-overlay" id="modal-newgame">
+  <div class="modal-box">
+    <div class="modal-title">🌿 NOUVELLE PARTIE</div>
+    <label class="newgame-label">Ton pseudo :</label>
+    <input class="newgame-input" id="input-pseudo" type="text" maxlength="20" placeholder="GamerDuDimanche42">
+    <label class="newgame-label">Nom de la sauvegarde :</label>
+    <input class="newgame-input" id="input-savename" type="text" maxlength="24" placeholder="Ma partie #1">
+    <button class="btn-newgame-start" onclick="startNewGame()">▶ LANCER LA PARTIE</button>
+    <button class="modal-close" style="margin-top:10px;background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.2);color:#aaa;" onclick="closeModal('newgame')">ANNULER</button>
+  </div>
+</div>
+
+<!-- SAUVEGARDES -->
+<div class="modal-overlay" id="modal-saves">
+  <div class="modal-box">
+    <div class="modal-title">💾 SAUVEGARDES</div>
+    <div id="saves-list"></div>
+    <button class="modal-close" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.2);color:#aaa;" onclick="closeModal('saves')">FERMER</button>
+  </div>
+</div>
+
+<!-- PAUSE -->
+<div class="modal-overlay" id="modal-pause">
+  <div class="modal-box">
+    <div class="modal-title">⏸ PAUSE</div>
+    <div class="pause-save-name" id="pause-save-label"></div>
+    <button class="pause-btn resume" onclick="resumeGame()">▶ REPRENDRE</button>
+    <button class="pause-btn save-and-continue" onclick="saveAndContinue()">💾 SAUVEGARDER</button>
+    <button class="pause-btn save-and-quit" onclick="saveAndQuit()">💾 SAUVEGARDER ET QUITTER</button>
+    <button class="pause-btn quit" onclick="quitWithoutSaving()">✕ QUITTER SANS SAUVEGARDER</button>
+  </div>
+</div>
+
+<script>
+// ===== ÉTAT DU JEU =====
+let state = {
+  points: 0,
+  pointsPerSec: 0,
+  pointsPerClick: 1,
+  totalPoints: 0,
+  upgrades: {},
+  plants: {},  // plantId -> count owned
+  gameRunning: false,
+  tickInterval: null,
+  eventInterval: null,
+  bladeInterval: null,
+  currentSaveId: null,
+  pseudo: '',
+  saveName: ''
+};
+
+const WIN_THRESHOLD = 50000;
+const GRASS_COOLDOWN = 280;
+const MIN_MOVE_DIST = 18;
+const SAVES_KEY = 'tgc_saves_v2';
+
+const UPGRADES = [
+  { id: 'caress1', name: 'Caresse Expert', icon: '✋', desc: '+1 point par touche', cost: 15, effect: 'ppc', value: 1, maxOwn: 10 },
+  { id: 'lawnmower', name: 'Tondeuse à main', icon: '🌾', desc: '+1 point/sec automatique', cost: 50, effect: 'pps', value: 1, maxOwn: 20 },
+  { id: 'gardening', name: 'Kit jardinage', icon: '🧤', desc: '+3 points par touche', cost: 120, effect: 'ppc', value: 3, maxOwn: 10 },
+  { id: 'sprinkler', name: 'Arroseur auto', icon: '💧', desc: '+3 points/sec', cost: 200, effect: 'pps', value: 3, maxOwn: 15 },
+  { id: 'sunscreen', name: 'Crème solaire SPF 50', icon: '☀️', desc: 'Tu supportes le soleil ! +5 ppc', cost: 400, effect: 'ppc', value: 5, maxOwn: 8 },
+  { id: 'bumblebee', name: 'Ami bourdon', icon: '🐝', desc: '+6 points/sec', cost: 600, effect: 'pps', value: 6, maxOwn: 10 },
+  { id: 'birdsong', name: 'Chant des oiseaux', icon: '🐦', desc: '+8 points par touche', cost: 1000, effect: 'ppc', value: 8, maxOwn: 5 },
+  { id: 'cloudwatch', name: 'Regarder les nuages', icon: '☁️', desc: '+12 points/sec', cost: 1800, effect: 'pps', value: 12, maxOwn: 8 },
+  { id: 'grass_type', name: 'Herbe Zoysia Premium', icon: '🌿', desc: '+20 ppc et +10 pps', cost: 3500, effect: 'both', value: [20,10], maxOwn: 3 },
+  { id: 'touch_guru', name: 'Maître du Touch Grass', icon: '🧘', desc: "+50 pps - L'illumination !", cost: 8000, effect: 'pps', value: 50, maxOwn: 5 },
+  { id: 'grass_farm', name: 'Prairie entière', icon: '🏡', desc: '+100 pps - Tu vis dehors maintenant', cost: 20000, effect: 'pps', value: 100, maxOwn: 3 },
+];
+
+const MENTAL_STAGES = [
+  { threshold: 0, label: "Plissé des yeux face au soleil" },
+  { threshold: 500, label: "Souvenir de la pluie sur la peau" },
+  { threshold: 2000, label: "Tu reconnais un oiseau (c'est un pigeon)" },
+  { threshold: 5000, label: "Les voisins ne sont pas des NPCs" },
+  { threshold: 10000, label: "Tu as dit bonjour à quelqu'un irl" },
+  { threshold: 20000, label: "Presque humain" },
+  { threshold: 35000, label: "La guérison approche..." },
+  { threshold: 50000, label: "🎉 GUÉRI ! Le soleil te sourit." },
+];
+
+// ===== ÉVÉNEMENTS ALÉATOIRES (PLUS NOMBREUX) =====
+const EVENTS = [
+  // ── BONUS ──
+  { type: 'bonus', icon: '🍪', title: 'Les cookies de maman !', desc: "Elle t'a apporté des cookies frais dehors.", effect: 'pts', value: 200, msg: '+200 pts de mental' },
+  { type: 'bonus', icon: '🌸', title: 'Fleur rare trouvée !', desc: "Une fleur sauvage pousse dans l'herbe.", effect: 'pts', value: 300, msg: '+300 pts' },
+  { type: 'bonus', icon: '🌞', title: 'Rayon de soleil parfait', desc: "La chaleur sur ta peau... tu avais oublié.", effect: 'mult', value: 3, duration: 15, msg: 'x3 pts pendant 15s !' },
+  { type: 'bonus', icon: '🐸', title: 'Une grenouille !', desc: "Elle te regarde. Elle approuve.", effect: 'pts', value: 180, msg: '+180 pts' },
+  { type: 'bonus', icon: '🌧️', title: 'Petite pluie douce', desc: "L'herbe sent bon après la pluie.", effect: 'pps_temp', value: 20, duration: 20, msg: '+20 pts/sec pendant 20s' },
+  { type: 'bonus', icon: '🦋', title: 'Un papillon !', desc: "Il s'est posé sur ta main. Incroyable.", effect: 'pts', value: 500, msg: '+500 pts ! Rare !' },
+  { type: 'bonus', icon: '🍦', title: 'Le camion de glaces !', desc: "Le mec du camion t'en offre une car tu as l'air tellement perdu dehors.", effect: 'pts', value: 350, msg: '+350 pts' },
+  { type: 'bonus', icon: '👴', title: 'Le voisin Gérard', desc: "Il te félicite de sortir enfin. Sympa ce Gérard.", effect: 'mult', value: 2, duration: 12, msg: 'x2 pts pendant 12s' },
+  { type: 'bonus', icon: '🌈', title: 'Arc-en-ciel !', desc: "Un arc-en-ciel apparaît après la pluie. Magnifique.", effect: 'mult', value: 2.5, duration: 18, msg: 'x2.5 pts pendant 18s !' },
+  { type: 'bonus', icon: '🐕', title: 'Un chien vient te voir !', desc: "Il te lèche la main. Tu te souviens ce que c'est d'être vivant.", effect: 'pts', value: 280, msg: '+280 pts' },
+  { type: 'bonus', icon: '🎵', title: 'Musique de glace !', desc: "Le son de la cloche du marchand de glaces au loin.", effect: 'pps_temp', value: 30, duration: 15, msg: '+30 pts/sec pendant 15s' },
+  { type: 'bonus', icon: '🍄', title: 'Champignon magique !', desc: "Tu trouves un champignon brillant dans l'herbe. Bonus rare !", effect: 'pts', value: 600, msg: '+600 pts ! TRÈS RARE !' },
+  { type: 'bonus', icon: '🦔', title: 'Un hérisson !', desc: "Un hérisson traverse ta pelouse. Tu n'as jamais rien vu d'aussi mignon.", effect: 'pts', value: 420, msg: '+420 pts' },
+  { type: 'bonus', icon: '🌻', title: 'Tournesol géant !', desc: "Un tournesol a poussé du jour au lendemain. Il te suit du regard.", effect: 'mult', value: 2, duration: 20, msg: 'x2 pts pendant 20s' },
+  { type: 'bonus', icon: '⚡', title: 'Énergie cosmique !', desc: "Tu sens une force venir de la terre. Inexplicable.", effect: 'pps_temp', value: 50, duration: 10, msg: '+50 pts/sec pendant 10s' },
+  { type: 'bonus', icon: '🎪', title: 'Fête de village !', desc: "Une fête foraine s'installe près de chez toi. Ça sent le churros.", effect: 'pts', value: 400, msg: '+400 pts' },
+  { type: 'bonus', icon: '🐦‍⬛', title: 'Corbeau philosophe', desc: "Un corbeau te fixe et incline la tête. Tu as l'impression qu'il comprend.", effect: 'pts', value: 250, msg: '+250 pts' },
+  { type: 'bonus', icon: '🌙', title: 'Pleine lune !', desc: "La lune est pleine ce soir. Son énergie te traverse.", effect: 'mult', value: 3, duration: 25, msg: 'x3 pts pendant 25s ! RARE !' },
+  // ── MALUS ──
+  { type: 'malus', icon: '📱', title: 'Appel de groupe Discord !', desc: "47 membres ont besoin de toi sur le serveur. Tu résistes...", effect: 'pts', value: -150, msg: '-150 pts de mental' },
+  { type: 'malus', icon: '🎮', title: 'Notification League of Legends', desc: '"Ton équipe t\'attend pour la ranked !" NON. Résiste.', effect: 'pts', value: -120, msg: '-120 pts' },
+  { type: 'malus', icon: '🌧️', title: 'Averse soudaine !', desc: "La pluie te tombe dessus. Retour en mode gamer activé.", effect: 'pts', value: -100, msg: '-100 pts' },
+  { type: 'malus', icon: '🐜', title: 'Invasion de fourmis !', desc: "Une colonne de fourmis envahit ta touffe. Beurk.", effect: 'pps_temp', value: -8, duration: 12, msg: '-8 pts/sec pendant 12s' },
+  { type: 'malus', icon: '📺', title: 'Ton voisin passe la tondeuse', desc: "Le bruit te rappelle les bruits de jeux. -points.", effect: 'pts', value: -130, msg: '-130 pts' },
+  { type: 'malus', icon: '😤', title: "Quelqu'un a marché sur ton herbe !", desc: '"MAIS T\'ES FOU OU QUOI ?!" Tu régresses.', effect: 'pts', value: -180, msg: '-180 pts' },
+  { type: 'malus', icon: '📣', title: 'Ban wave sur Discord !', desc: "Tu es temp-ban du serveur. Tu veux rentrer défendre ton cas...", effect: 'mult', value: 0.5, duration: 10, msg: 'x0.5 pts pendant 10s' },
+  { type: 'malus', icon: '💀', title: 'Souvenir de ton KDA', desc: '"5/14/2... J\'aurais pu carry ce game." La spirale commence.', effect: 'pts', value: -200, msg: '-200 pts' },
+  { type: 'malus', icon: '🌩️', title: 'Orage soudain !', desc: "Un éclair tombe dans le jardin. Tu as failli perdre un an de vie.", effect: 'pts', value: -160, msg: '-160 pts' },
+  { type: 'malus', icon: '🐛', title: 'Une chenille sur ta main !', desc: "AAAH ! Tu la secoues. Tout le quartier t'a entendu crier.", effect: 'pps_temp', value: -10, duration: 15, msg: '-10 pts/sec pendant 15s' },
+  { type: 'malus', icon: '☎️', title: 'Ta mère t\'appelle pour dîner', desc: "T'as pas faim ! T'es dehors ! Elle insiste... tu craques.", effect: 'mult', value: 0.6, duration: 12, msg: 'x0.6 pts pendant 12s' },
+  { type: 'malus', icon: '🕷️', title: 'Araignée géante !', desc: "Une araignée de la taille d'une main sort de l'herbe. Panique totale.", effect: 'pts', value: -250, msg: '-250 pts !' },
+  { type: 'malus', icon: '📰', title: 'Mauvaises nouvelles', desc: "Tu as eu le malheur de regarder les infos sur ton téléphone.", effect: 'pts', value: -140, msg: '-140 pts' },
+];
+
+let activeMultiplier = 1;
+let activePpsBonus = 0;
+let eventNotifEl = null;
+let eventTimeout = null;
+let currentShopTab = 'upgrades';
+
+// ===== PLANTES JARDILAND =====
+const PLANTS = [
+  { id: 'lavande', name: 'Lavande', icon: '💜', emoji: '🪻', desc: '+2 pts par caresse', ppc: 2, pps: 0, cost: 80, maxOwn: 4, color: '#b39ddb', posOffsets: [-120, -180, -240, -300] },
+  { id: 'tournesol', name: 'Tournesol', icon: '🌻', emoji: '🌻', desc: '+4 pts par caresse & +1/sec', ppc: 4, pps: 1, cost: 250, maxOwn: 3, color: '#FFD700', posOffsets: [120, 180, 240] },
+  { id: 'rosier', name: 'Rosier', icon: '🌹', emoji: '🌹', desc: '+7 pts par caresse & +2/sec', ppc: 7, pps: 2, cost: 600, maxOwn: 3, color: '#e91e63', posOffsets: [-150, -220, -290] },
+  { id: 'bambou', name: 'Bambou', icon: '🎋', emoji: '🎋', desc: '+10 pts par caresse & +4/sec', ppc: 10, pps: 4, cost: 1500, maxOwn: 2, color: '#66bb6a', posOffsets: [150, 220] },
+  { id: 'bonsai', name: 'Bonsaï', icon: '🌳', emoji: '🌳', desc: '+20 pts par caresse & +8/sec', ppc: 20, pps: 8, cost: 4000, maxOwn: 2, color: '#4CAF50', posOffsets: [-180, -260] },
+  { id: 'cactus', name: 'Cactus Rare', icon: '🌵', emoji: '🌵', desc: '+35 pts par caresse & +15/sec', ppc: 35, pps: 15, cost: 10000, maxOwn: 1, color: '#26a69a', posOffsets: [160] },
+];
+
+// Plantes actuellement plantées sur le terrain
+let plantedPlants = []; // { plantId, instanceId, x, ppc, pps, onCooldown }
+let plantIdCounter = 0;
+
+// ===== SPLASH TEXTS =====
+const SPLASH_TEXTS = [
+  "i love you ikea",
+  "made with love",
+  "va toucher de l'herbe dans la vraie vie",
+  "cookie!!!!!!!!!!!!!!!!!!!!!!!!",
+  "vous me connaissez 👁️👁️",
+  "beta. juste une beta",
+  "discord soda chaise chambre pied... hein?",
+  "0.0001% d'herbe touchée",
+  "la modération est un mode de vie",
+  "speedrun de bannissement any%",
+  "approuvé par les discord kittens",
+  "simulateur de toucher d'herbe",
+  "merci de boire de l'eau",
+  "chargement du déodorant... échec",
+  "édition chroniquement en ligne",
+  "ATTENTION : lumière du soleil détectée",
+  "modérateur niveau mamie",
+  "physique d'herbe 100% RÉALISTE",
+  "aucune compétence sociale requise",
+  "keyboard warrior tycoon",
+  "online depuis 2017",
+  "succès débloqué : rideaux ouverts",
+  "nouvelle mise à jour : extérieur supprimé",
+  "l'herbe est rendue en 4K",
+  "classique certifié de sous-sol",
+  "académie de modération Discord",
+  "sponsorisé par l'insomnie",
+  "ta chaise te manque déjà",
+  "12 heures sans lumière naturelle",
+  "odeur de gamer détectée",
+  "grass DLC sold separately",
+  "ouvre la fenêtre stp",
+  "mode nuit permanent activé",
+  "aucune douche depuis le dernier patch",
+  "compilé à 3h du matin",
+  "optimisé pour les débats inutiles",
+  "warning: human interaction nearby",
+  "l'herbe n'est pas un mythe",
+  "touché par 3 développeurs fatigués",
+  "expérience sociale non incluse",
+  "votre mère est fière... peut-être",
+  "shaders RTX pour l'herbe",
+  "99% clavier, 1% vitamine D",
+  "désormais avec plus de sueur",
+  "fonctionne mieux sans soleil",
+  "anti-herbe technology",
+  '"je vais dormir tôt" — mensonge',
+  "testé sur des modérateurs réels",
+  "Discord Nitro non remboursable",
+  "grass engine v0.0.1",
+  "erreur 404 : vie sociale introuvable",
+  "maintenant avec odeur intégrée",
+  "certifié sans activité physique",
+  "les oiseaux sont réels",
+  "dehors existe vraiment",
+  "la lumière du soleil fait peur",
+  "développé dans une chambre sombre",
+  "ton écran te regarde",
+  "+5 XP en respiration extérieure",
+  "la communauté sent bizarre",
+  "texture d'herbe HD ultra réaliste",
+  '"juste une dernière game"',
+  "attention aux interactions humaines",
+  "récompensé par personne",
+  "nominé aux Basement Awards 2026",
+  "plus immersif qu'une vraie sortie",
+  "grasscore edition 🌱",
+];
+let lastSplashIdx = -1;
+
+function pickSplash() {
+  let idx;
+  do { idx = Math.floor(Math.random() * SPLASH_TEXTS.length); } while (idx === lastSplashIdx);
+  lastSplashIdx = idx;
+  const el = document.getElementById('splash-text');
+  if (el) el.textContent = SPLASH_TEXTS[idx];
+}
+
+// ===== EMOJIS ARRIÈRE-PLAN MENU =====
+const MENU_EMOJIS = ['🌿','🍃','🌱','🍀','🌾','🌻','🌸','🌺','🌳','🌲','🍄','🌵','🎋','🪻','🐝','🦋','🐸','🐞','🌈','☀️','🌙','⭐','🎮','🕹️','👾','🎯','💾','🖥️','⌨️','🖱️','🏆','💀','⚡','🔥','🍪','🧃','🥤','🫠','🎧','🐦','🦔','🐕'];
+const FALL_ANIMS = ['menufall-a','menufall-b','menufall-c','menufall-d','menufall-e'];
+let menuEmojiInterval = null;
+
+function spawnMenuEmoji() {
+  const container = document.getElementById('menu-bg-emojis');
+  if (!container) return;
+  const emoji = MENU_EMOJIS[Math.floor(Math.random() * MENU_EMOJIS.length)];
+  const size = 16 + Math.floor(Math.random() * 52);
+  const left = Math.random() * 100;
+  const duration = 7 + Math.random() * 13;
+  const delay = -(Math.random() * 1.5);
+  const anim = FALL_ANIMS[Math.floor(Math.random() * FALL_ANIMS.length)];
+  const opacity = 0.15 + Math.random() * 0.35;
+  const el = document.createElement('div');
+  el.className = 'menu-emoji';
+  el.textContent = emoji;
+  el.style.cssText = `left:${left}vw;top:-80px;font-size:${size}px;opacity:${opacity};animation:${anim} ${duration}s linear ${delay}s forwards;`;
+  container.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, (duration + 2) * 1000);
+}
+
+function startMenuEmojis() {
+  stopMenuEmojis();
+  for (let i = 0; i < 4; i++) setTimeout(spawnMenuEmoji, i * 600);
+  menuEmojiInterval = setInterval(spawnMenuEmoji, 2200);
+}
+
+function stopMenuEmojis() {
+  if (menuEmojiInterval) { clearInterval(menuEmojiInterval); menuEmojiInterval = null; }
+  const c = document.getElementById('menu-bg-emojis');
+  if (c) c.innerHTML = '';
+}
+
+// ===== NAVIGATION =====
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'menu') { pickSplash(); startMenuEmojis(); }
+  else stopMenuEmojis();
+}
+
+function clearAllIntervals() {
+  if (state.tickInterval) clearInterval(state.tickInterval);
+  if (state.eventInterval) clearTimeout(state.eventInterval);
+  if (state.bladeInterval) clearTimeout(state.bladeInterval);
+  state.tickInterval = null;
+  state.eventInterval = null;
+  state.bladeInterval = null;
+}
+
+// ===== MODALS =====
+function openModal(name) {
+  if (name === 'saves') renderSavesList();
+  document.getElementById('modal-' + name).classList.add('open');
+}
+function closeModal(name) {
+  document.getElementById('modal-' + name).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m) m.classList.remove('open');
+  });
+});
+
+// ===== SYSTÈME DE SAUVEGARDES =====
+function getAllSaves() {
+  try {
+    return JSON.parse(localStorage.getItem(SAVES_KEY)) || {};
+  } catch(e) { return {}; }
+}
+
+function writeSaves(saves) {
+  try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves)); } catch(e) {}
+}
+
+function saveCurrentGame() {
+  if (!state.currentSaveId) return;
+  const saves = getAllSaves();
+  saves[state.currentSaveId] = {
+    id: state.currentSaveId,
+    pseudo: state.pseudo,
+    saveName: state.saveName,
+    date: new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+    points: state.points,
+    totalPoints: state.totalPoints,
+    pointsPerSec: state.pointsPerSec,
+    pointsPerClick: state.pointsPerClick,
+    upgrades: state.upgrades,
+    plants: state.plants
+  };
+  writeSaves(saves);
+}
+
+function loadSave(id) {
+  const saves = getAllSaves();
+  const s = saves[id];
+  if (!s) return;
+  state.currentSaveId = s.id;
+  state.pseudo = s.pseudo || '';
+  state.saveName = s.saveName || '';
+  state.points = s.points || 0;
+  state.totalPoints = s.totalPoints || 0;
+  state.pointsPerSec = s.pointsPerSec || 0;
+  state.pointsPerClick = s.pointsPerClick || 1;
+  state.upgrades = s.upgrades || {};
+  state.plants = s.plants || {};
+}
+
+function deleteSave(id) {
+  const saves = getAllSaves();
+  delete saves[id];
+  writeSaves(saves);
+  renderSavesList();
+}
+
+function renderSavesList() {
+  const saves = getAllSaves();
+  const list = document.getElementById('saves-list');
+  const keys = Object.keys(saves);
+  if (keys.length === 0) {
+    list.innerHTML = '<div class="saves-empty">Aucune sauvegarde trouvée.<br>Lance une nouvelle partie !</div>';
+    return;
+  }
+  list.innerHTML = '';
+  keys.forEach(id => {
+    const s = saves[id];
+    const div = document.createElement('div');
+    div.className = 'save-slot';
+    div.innerHTML = `
+      <div class="save-slot-info">
+        <div class="save-slot-name">💾 ${escHtml(s.saveName)}</div>
+        <div class="save-slot-pseudo">👤 ${escHtml(s.pseudo)}</div>
+        <div class="save-slot-details">${formatNum(Math.floor(s.totalPoints))} pts total · ${s.date || 'Date inconnue'}</div>
+      </div>
+      <div class="save-slot-btns">
+        <button class="btn-load-save" onclick="continueFromSave('${id}')">▶ CONTINUER</button>
+        <button class="btn-del-save" onclick="confirmDeleteSave('${id}')">🗑 SUPPRIMER</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function confirmDeleteSave(id) {
+  const saves = getAllSaves();
+  const s = saves[id];
+  if (!s) return;
+  if (confirm(`Supprimer la sauvegarde "${s.saveName}" (${s.pseudo}) ? Cette action est irréversible !`)) {
+    deleteSave(id);
+  }
+}
+
+function continueFromSave(id) {
+  closeModal('saves');
+  loadSave(id);
+  launchGame();
+}
+
+// ===== NOUVELLE PARTIE =====
+function openNewGameModal() {
+  document.getElementById('input-pseudo').value = '';
+  document.getElementById('input-savename').value = '';
+  openModal('newgame');
+  setTimeout(() => document.getElementById('input-pseudo').focus(), 100);
+}
+
+function startNewGame() {
+  const pseudo = document.getElementById('input-pseudo').value.trim();
+  const saveName = document.getElementById('input-savename').value.trim();
+  if (!pseudo) { alert('Entre ton pseudo !'); return; }
+  if (!saveName) { alert('Donne un nom à ta sauvegarde !'); return; }
+
+  // Reset state
+  state = {
+    points: 0, pointsPerSec: 0, pointsPerClick: 1, totalPoints: 0,
+    upgrades: {}, plants: {}, gameRunning: false,
+    tickInterval: null, eventInterval: null, bladeInterval: null,
+    currentSaveId: 'save_' + Date.now(),
+    pseudo, saveName
+  };
+  activeMultiplier = 1; activePpsBonus = 0;
+
+  // Crée la sauvegarde initiale
+  saveCurrentGame();
+
+  closeModal('newgame');
+  launchGame();
+}
+
+// ===== LANCEMENT DU JEU =====
+function launchGame() {
+  showScreen('game');
+  document.getElementById('hud-player-name').textContent = state.pseudo ? '👤 ' + state.pseudo : '';
+  state.gameRunning = true;
+  activeMultiplier = 1;
+  activePpsBonus = 0;
+  renderShop();
+  updateHUD();
+  clearAllIntervals();
+  clearPlantedPlants();
+  state.tickInterval = setInterval(gameTick, 1000);
+  scheduleNextEvent();
+  scheduleNextBlade();
+  setupGrassInteraction();
+  createEventNotifEl();
+  restorePlantedPlants();
+}
+
+// ===== PAUSE =====
+function openPauseModal() {
+  if (!state.gameRunning) return;
+  clearAllIntervals();
+  state.gameRunning = false;
+  const label = document.getElementById('pause-save-label');
+  label.textContent = state.saveName ? `💾 "${state.saveName}" — ${state.pseudo}` : '';
+  openModal('pause');
+}
+
+function resumeGame() {
+  closeModal('pause');
+  state.gameRunning = true;
+  clearAllIntervals();
+  state.tickInterval = setInterval(gameTick, 1000);
+  scheduleNextEvent();
+  scheduleNextBlade();
+}
+
+function saveAndContinue() {
+  saveCurrentGame();
+  showNotif('💾 Partie sauvegardée !');
+  closeModal('pause');
+  resumeGame();
+}
+
+function saveAndQuit() {
+  saveCurrentGame();
+  closeModal('pause');
+  clearFallingBlades();
+  clearPlantedPlants();
+  resetGameState();
+  showScreen('menu');
+}
+
+function quitWithoutSaving() {
+  if (!confirm('Quitter sans sauvegarder ? Ta progression depuis la dernière sauvegarde sera perdue !')) return;
+  closeModal('pause');
+  clearFallingBlades();
+  clearPlantedPlants();
+  resetGameState();
+  showScreen('menu');
+}
+
+function resetGameState() {
+  clearAllIntervals();
+  clearPlantedPlants();
+  state = {
+    points: 0, pointsPerSec: 0, pointsPerClick: 1, totalPoints: 0,
+    upgrades: {}, plants: {}, gameRunning: false,
+    tickInterval: null, eventInterval: null, bladeInterval: null,
+    currentSaveId: null, pseudo: '', saveName: ''
+  };
+  activeMultiplier = 1; activePpsBonus = 0;
+}
+
+// ===== TICK =====
+function gameTick() {
+  if (!state.gameRunning) return;
+  const earned = (state.pointsPerSec + activePpsBonus) * activeMultiplier;
+  addPoints(Math.round(earned));
+}
+
+function addPoints(n) {
+  state.points = Math.max(0, state.points + n);
+  state.totalPoints += Math.max(0, n);
+  updateHUD();
+  checkWin();
+}
+
+function checkWin() {
+  if (state.points >= WIN_THRESHOLD) {
+    clearAllIntervals();
+    state.gameRunning = false;
+    clearFallingBlades();
+    saveCurrentGame();
+    setTimeout(() => showScreen('win'), 500);
+  }
+}
+
+// ===== HERBE =====
+let grassListenersSetup = false;
+function setupGrassInteraction() {
+  if (grassListenersSetup) return;
+  grassListenersSetup = true;
+  const container = document.getElementById('grass-container');
+  let lastX = -999, lastY = -999;
+  let onCooldown = false;
+
+  function tryGrassTouch(x, y) {
+    if (onCooldown || !state.gameRunning) return;
+    const rect = container.getBoundingClientRect();
+    const relX = x - rect.left, relY = y - rect.top;
+    const cx = rect.width / 2, cy = rect.height * 0.78;
+    const dx = relX - cx, dy = relY - cy;
+    if ((dx*dx)/(62*62) + (dy*dy)/(52*52) > 1.4) return;
+    const dist = Math.sqrt((x-lastX)**2 + (y-lastY)**2);
+    if (dist < MIN_MOVE_DIST) return;
+    lastX = x; lastY = y;
+    const pts = Math.round(state.pointsPerClick * activeMultiplier);
+    addPoints(pts);
+    spawnRipple(x, y);
+    spawnFloatText(x, y, '+' + pts);
+    animateGrass();
+    onCooldown = true;
+    container.classList.add('on-cooldown');
+    setTimeout(() => { onCooldown = false; container.classList.remove('on-cooldown'); }, GRASS_COOLDOWN);
+  }
+
+  container.addEventListener('mousemove', e => tryGrassTouch(e.clientX, e.clientY));
+  container.addEventListener('click', e => { lastX = -999; lastY = -999; tryGrassTouch(e.clientX, e.clientY); });
+  container.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; tryGrassTouch(t.clientX, t.clientY); }, { passive: false });
+}
+
+function spawnRipple(x, y) {
+  const el = document.createElement('div');
+  el.className = 'ripple-effect';
+  el.style.cssText = `left:${x}px;top:${y}px;position:fixed;z-index:50;`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 500);
+}
+
+function spawnFloatText(x, y, text, color) {
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.textContent = text;
+  if (color) el.style.color = color;
+  el.style.cssText += `left:${x - 20}px;top:${y - 20}px;position:fixed;`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function animateGrass() {
+  document.querySelectorAll('.grass-blade').forEach(b => {
+    const angle = (Math.random() - 0.5) * 22;
+    const delay = Math.random() * 50;
+    setTimeout(() => {
+      b.style.transform = `rotate(${angle}deg) scaleY(${0.9 + Math.random()*0.14})`;
+      setTimeout(() => { b.style.transform = ''; }, 220);
+    }, delay);
+  });
+}
+
+// ===== HUD =====
+function updateHUD() {
+  document.getElementById('pts-display').textContent = formatNum(Math.floor(state.points));
+  const totalPps = (state.pointsPerSec + activePpsBonus) * activeMultiplier;
+  document.getElementById('pps-display').textContent = '+' + formatNum(Math.round(totalPps)) + '/sec';
+  const pct = Math.min(100, (state.totalPoints / WIN_THRESHOLD) * 100);
+  document.getElementById('mental-bar').style.width = pct + '%';
+  const stage = MENTAL_STAGES.slice().reverse().find(s => state.totalPoints >= s.threshold);
+  document.getElementById('mental-status').textContent = stage ? stage.label : MENTAL_STAGES[0].label;
+  const sunOpacity = Math.min(0.6, state.totalPoints / WIN_THRESHOLD * 0.6);
+  document.getElementById('sunshine').style.opacity = sunOpacity;
+  renderShop();
+  if (currentShopTab === 'jardiland') renderJardiland();
+}
+
+function formatNum(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'k';
+  return n.toString();
+}
+
+// ===== BOUTIQUE =====
+function switchShopTab(tab) {
+  currentShopTab = tab;
+  document.querySelectorAll('.shop-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.shop-tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('tab-content-' + tab).classList.add('active');
+  if (tab === 'jardiland') renderJardiland();
+  else renderShop();
+}
+
+function toggleShop() {
+  document.getElementById('shop-panel').classList.toggle('open');
+}
+
+function renderShop() {
+  const list = document.getElementById('shop-items-list');
+  list.innerHTML = '';
+  UPGRADES.forEach(upg => {
+    const owned = state.upgrades[upg.id] || 0;
+    const maxed = owned >= upg.maxOwn;
+    const price = getUpgradePrice(upg);
+    const canAfford = state.points >= price && !maxed;
+    const div = document.createElement('div');
+    div.className = 'shop-item' + (maxed ? ' owned' : (canAfford ? '' : ' locked'));
+    div.innerHTML = `
+      <div class="shop-icon">${upg.icon}</div>
+      <div class="shop-info">
+        <div class="shop-name">${upg.name}</div>
+        <div class="shop-desc">${upg.desc}</div>
+        ${owned > 0 ? `<div class="shop-count">Possédé : ${owned}/${upg.maxOwn}</div>` : ''}
+        <div class="shop-price ${canAfford || maxed ? 'can-afford' : 'cant-afford'}">
+          ${maxed ? '✅ MAXÉ' : '💰 ' + formatNum(price) + ' pts'}
+        </div>
+      </div>
+    `;
+    if (canAfford) div.addEventListener('click', () => buyUpgrade(upg.id));
+    list.appendChild(div);
+  });
+}
+
+// ===== PRIX DYNAMIQUES =====
+// Chaque achat augmente le prix de ~40% (upgrades) ou ~60% (plantes rares)
+function getUpgradePrice(upg) {
+  const owned = state.upgrades[upg.id] || 0;
+  return Math.ceil(upg.cost * Math.pow(1.4, owned));
+}
+
+function getPlantPrice(plant) {
+  const owned = state.plants[plant.id] || 0;
+  return Math.ceil(plant.cost * Math.pow(1.6, owned));
+}
+
+function buyUpgrade(id) {
+  const upg = UPGRADES.find(u => u.id === id);
+  if (!upg) return;
+  const owned = state.upgrades[id] || 0;
+  const price = getUpgradePrice(upg);
+  if (owned >= upg.maxOwn || state.points < price) return;
+  state.points -= price;
+  state.upgrades[id] = owned + 1;
+  if (upg.effect === 'ppc') state.pointsPerClick += upg.value;
+  else if (upg.effect === 'pps') state.pointsPerSec += upg.value;
+  else if (upg.effect === 'both') { state.pointsPerClick += upg.value[0]; state.pointsPerSec += upg.value[1]; }
+  showNotif(`${upg.icon} ${upg.name} acheté !`);
+  updateHUD();
+}
+
+// ===== JARDILAND =====
+function renderJardiland() {
+  const list = document.getElementById('jardiland-items-list');
+  list.innerHTML = '';
+  PLANTS.forEach(plant => {
+    const owned = state.plants[plant.id] || 0;
+    const maxed = owned >= plant.maxOwn;
+    const price = getPlantPrice(plant);
+    const canAfford = state.points >= price && !maxed;
+    const div = document.createElement('div');
+    div.className = 'plant-item' + (maxed ? ' maxed' : (canAfford ? '' : ' locked'));
+    div.innerHTML = `
+      <div class="plant-icon-wrap">
+        <span style="font-size:30px">${plant.emoji}</span>
+        ${owned > 0 ? `<div class="plant-badge">${owned}</div>` : ''}
+      </div>
+      <div class="shop-info">
+        <div class="shop-name" style="color:${plant.color}">${plant.name}</div>
+        <div class="shop-desc">${plant.desc}</div>
+        ${owned > 0 ? `<div class="shop-count">Plantée : ${owned}/${plant.maxOwn}</div>` : ''}
+        <div class="shop-price ${canAfford || maxed ? 'can-afford' : 'cant-afford'}">
+          ${maxed ? '✅ JARDIN COMPLET' : '💰 ' + formatNum(price) + ' pts'}
+        </div>
+      </div>
+    `;
+    if (canAfford) div.addEventListener('click', () => buyPlant(plant.id));
+    list.appendChild(div);
+  });
+}
+
+function buyPlant(id) {
+  const plant = PLANTS.find(p => p.id === id);
+  if (!plant) return;
+  const owned = state.plants[id] || 0;
+  const price = getPlantPrice(plant);
+  if (owned >= plant.maxOwn || state.points < price) return;
+  state.points -= price;
+  state.plants[id] = owned + 1;
+  state.pointsPerSec += plant.pps;
+  spawnPlantedPlant(plant, owned);
+  showNotif(`${plant.emoji} ${plant.name} plantée dans ton jardin !`);
+  updateHUD();
+  renderJardiland();
+}
+
+function spawnPlantedPlant(plant, index) {
+  const gameScreen = document.getElementById('screen-game');
+  const el = document.createElement('div');
+  el.className = 'planted-plant';
+  el.textContent = plant.emoji;
+  el.style.fontSize = '38px';
+  el.style.filter = `drop-shadow(0 4px 12px ${plant.color}88)`;
+
+  // Position: alternate left/right of the main grass
+  const offset = plant.posOffsets[index] || (index % 2 === 0 ? -130 - index*40 : 130 + index*40);
+  el.style.left = `calc(50% + ${offset}px)`;
+  el.style.transform = 'translateX(-50%)';
+
+  const instanceId = ++plantIdCounter;
+  el.dataset.instanceId = instanceId;
+  el.dataset.plantId = plant.id;
+  el.dataset.ppc = plant.ppc;
+
+  let plantCooldown = false;
+
+  function touchPlant(x, y) {
+    if (plantCooldown || !state.gameRunning) return;
+    plantCooldown = true;
+    const pts = Math.round(plant.ppc * activeMultiplier);
+    addPoints(pts);
+    spawnFloatText(x, y, '+' + pts, plant.color);
+    el.classList.add('touched');
+    setTimeout(() => { el.classList.remove('touched'); }, 220);
+    setTimeout(() => { plantCooldown = false; }, 350);
+  }
+
+  el.addEventListener('click', e => touchPlant(e.clientX, e.clientY));
+  el.addEventListener('mousemove', e => touchPlant(e.clientX, e.clientY));
+  el.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; touchPlant(t.clientX, t.clientY); }, { passive: false });
+
+  plantedPlants.push({ instanceId, plantId: plant.id, el });
+  gameScreen.appendChild(el);
+}
+
+function restorePlantedPlants() {
+  // Re-spawn plants from saved state
+  plantedPlants = [];
+  PLANTS.forEach(plant => {
+    const owned = state.plants[plant.id] || 0;
+    for (let i = 0; i < owned; i++) {
+      spawnPlantedPlant(plant, i);
+    }
+  });
+}
+
+function clearPlantedPlants() {
+  plantedPlants.forEach(p => { if (p.el && p.el.parentNode) p.el.remove(); });
+  plantedPlants = [];
+}
+
+// ===== NOTIF =====
+function showNotif(text) {
+  const el = document.createElement('div');
+  el.className = 'notif';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+// ===== ÉVÉNEMENTS =====
+function createEventNotifEl() {
+  if (document.getElementById('event-notif')) return;
+  const el = document.createElement('div');
+  el.id = 'event-notif';
+  el.className = 'event-notif';
+  el.innerHTML = '<span class="event-icon" id="ev-icon"></span><span class="event-title" id="ev-title"></span><span class="event-effect" id="ev-effect"></span>';
+  document.body.appendChild(el);
+  eventNotifEl = el;
+}
+
+function scheduleNextEvent() {
+  if (!state.gameRunning) return;
+  const delay = 45000 + Math.random() * 45000; // 45-90s (plus rare)
+  state.eventInterval = setTimeout(() => {
+    if (state.gameRunning) { triggerRandomEvent(); scheduleNextEvent(); }
+  }, delay);
+}
+
+function triggerRandomEvent() {
+  const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+  const el = document.getElementById('event-notif');
+  if (!el) return;
+  el.className = 'event-notif ' + ev.type;
+  document.getElementById('ev-icon').textContent = ev.icon;
+  document.getElementById('ev-title').textContent = ev.title;
+  document.getElementById('ev-effect').textContent = ev.desc + ' → ' + ev.msg;
+  el.classList.add('show');
+  if (eventTimeout) clearTimeout(eventTimeout);
+  eventTimeout = setTimeout(() => { el.classList.remove('show'); }, 4500);
+  if (ev.effect === 'pts') {
+    addPoints(ev.value);
+    spawnEventParticles(ev.value > 0);
+  } else if (ev.effect === 'mult') {
+    applyTempMultiplier(ev.value, ev.duration * 1000);
+  } else if (ev.effect === 'pps_temp') {
+    applyTempPpsBonus(ev.value, ev.duration * 1000);
+  }
+}
+
+function applyTempMultiplier(mult, duration) {
+  activeMultiplier = mult;
+  updateHUD();
+  setTimeout(() => { activeMultiplier = 1; updateHUD(); }, duration);
+}
+
+function applyTempPpsBonus(bonus, duration) {
+  activePpsBonus += bonus;
+  updateHUD();
+  setTimeout(() => { activePpsBonus -= bonus; updateHUD(); }, duration);
+}
+
+function spawnEventParticles(isBonus) {
+  const chars = isBonus ? ['✨','🌟','💚','🌿'] : ['💀','😤','📱','❌'];
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.style.cssText = `position:fixed;font-size:22px;left:${20+Math.random()*60}vw;top:${30+Math.random()*30}vh;pointer-events:none;z-index:400;animation:floatup 1.2s ease-out forwards;`;
+      el.textContent = chars[Math.floor(Math.random()*chars.length)];
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1200);
+    }, i * 120);
+  }
+}
+
+// ===== BONUS QUI TOMBENT (PLUS GRANDS, PLUS RARES) =====
+const BLADE_EMOJIS = ['🌿','🍃','🌱','🍀','🌾'];
+const BLADE_GOLD = '⭐';
+const BLADE_SPECIAL = ['🌺','🌸','🦋','🐞'];
+
+function scheduleNextBlade() {
+  if (!state.gameRunning) return;
+  // Plus rare : 12-25 secondes (était 6-14s)
+  const delay = 12000 + Math.random() * 13000;
+  state.bladeInterval = setTimeout(() => {
+    if (state.gameRunning) { spawnFallingBlade(); scheduleNextBlade(); }
+  }, delay);
+}
+
+function spawnFallingBlade() {
+  const rand = Math.random();
+  // Dorée : 6% (était 12%)
+  const isGolden = rand < 0.06;
+  // Spéciale : 10%
+  const isSpecial = !isGolden && rand < 0.16;
+
+  const el = document.createElement('div');
+  const rot = Math.floor(Math.random() * 360);
+  const leftPct = 5 + Math.random() * 90;
+  const duration = 6 + Math.random() * 5; // 6-11s
+
+  el.className = 'falling-blade' + (isGolden ? ' golden' : '');
+  if (isGolden) {
+    el.textContent = BLADE_GOLD;
+  } else if (isSpecial) {
+    el.textContent = BLADE_SPECIAL[Math.floor(Math.random() * BLADE_SPECIAL.length)];
+    el.style.fontSize = '40px';
+    el.style.filter = 'drop-shadow(0 2px 12px rgba(255,100,200,0.8))';
+  } else {
+    el.textContent = BLADE_EMOJIS[Math.floor(Math.random() * BLADE_EMOJIS.length)];
+  }
+  el.style.cssText += `left:${leftPct}vw;--rot:${rot}deg;animation-duration:${duration}s;`;
+
+  let reward;
+  if (isGolden) {
+    reward = { pts: Math.floor(state.pointsPerClick * 30 + 200), msg: '🌟 JACKPOT ! +' };
+  } else if (isSpecial) {
+    reward = { pts: Math.floor(state.pointsPerClick * 12 + 80), msg: '🌸 SPÉCIAL ! +' };
+  } else {
+    reward = { pts: Math.floor(state.pointsPerClick * 5 + 20 + Math.random()*40), msg: '🍃 +' };
+  }
+
+  el.addEventListener('click', () => {
+    if (el.classList.contains('blade-caught')) return;
+    el.classList.add('blade-caught');
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    addPoints(reward.pts);
+    spawnFloatText(cx, cy - 20, reward.msg + reward.pts, isGolden ? '#FFD700' : isSpecial ? '#FF8FAB' : '#A5D6A7');
+    setTimeout(() => el.remove(), 400);
+  });
+
+  setTimeout(() => { if (el.parentNode) el.remove(); }, duration * 1000 + 500);
+  document.getElementById('screen-game').appendChild(el);
+}
+
+function clearFallingBlades() {
+  document.querySelectorAll('.falling-blade').forEach(b => b.remove());
+}
+
+// Autosave toutes les 30 sec
+setInterval(() => {
+  if (state.gameRunning && state.currentSaveId) saveCurrentGame();
+}, 30000);
+
+// Splash initial au chargement
+pickSplash();
+// Si on est déjà sur le menu au démarrage, lancer les emojis
+if (document.getElementById('screen-menu').classList.contains('active')) startMenuEmojis();
+</script>
+</body>
+</html>
