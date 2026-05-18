@@ -1910,10 +1910,12 @@
 
   <!-- Pause overlay -->
   <div id="tissue-pause-overlay" style="display:none;position:absolute;inset:0;z-index:35;background:rgba(0,0,0,0.88);flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;">
-    <div style="font-family:var(--pixel);font-size:13px;color:#9b59b6;margin-bottom:8px;line-height:2;">⏸ PAUSE<br><span style="font-size:9px;color:#fee75c;">NIVEAU BONUS</span></div>
-    <button class="pause-btn" onclick="resumeTissueGame()">▶ REPRENDRE</button>
-    <button class="pause-btn" style="background:rgba(80,0,120,0.15);border-color:rgba(180,0,255,0.35);color:#cc88ff;font-size:8px;" onclick="document.getElementById('tissue-pause-overlay').style.display='none';openCheatModal('tissue')">🔑 CODE SECRET</button>
-    <button class="pause-btn" style="opacity:0.6;font-size:8px;" onclick="stopTissueGame();showScreen('win3');">↩ RETOUR</button>
+    <div class="modal-box" style="border-color:#9b59b6;background:#0d0a1e;text-align:center;">
+      <div class="modal-title" style="color:#9b59b6;">⏸ PAUSE<br><span style="font-size:8px;color:#fee75c;">NIVEAU BONUS</span></div>
+      <button class="pause-btn resume" onclick="resumeTissueGame()">▶ REPRENDRE</button>
+      <button class="pause-btn quit" onclick="stopTissueGame();showScreen('win3');">✕ QUITTER LE NIVEAU BONUS</button>
+      <button class="pause-btn" style="background:rgba(80,0,120,0.15);border-color:rgba(180,0,255,0.35);color:#cc88ff;margin-top:10px;font-size:8px;" onclick="document.getElementById('tissue-pause-overlay').style.display='none';openCheatModal('tissue')">🔑 CODE SECRET</button>
+    </div>
   </div>
 
   <div id="tissue-overlay" style="display:none;position:absolute;inset:0;z-index:30;background:rgba(0,0,0,0.85);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;">
@@ -2150,10 +2152,13 @@
 
   <!-- Pause chambre -->
   <div id="bedroom-pause-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
-    <div style="background:#0d0a1e;border:2px solid #9b59b6;border-radius:16px;padding:32px;text-align:center;min-width:300px;">
-      <div style="font-family:'Press Start 2P',monospace;font-size:11px;color:#9b59b6;margin-bottom:20px;">⏸ PAUSE</div>
-      <button class="pause-btn" style="border-color:#9b59b6;" onclick="resumeBedroom()">▶ REPRENDRE</button>
-      <button class="pause-btn" style="border-color:#9b59b6;" onclick="saveBedroomAndQuit()">🚪 QUITTER</button>
+    <div class="modal-box" style="border-color:#9b59b6;background:#0d0a1e;text-align:center;">
+      <div class="modal-title" style="color:#9b59b6;">⏸ PAUSE</div>
+      <div class="pause-save-name" id="bedroom-pause-save-label"></div>
+      <button class="pause-btn resume" onclick="resumeBedroom()">▶ REPRENDRE</button>
+      <button class="pause-btn save-and-continue" onclick="saveBedroomAndContinue()">💾 SAUVEGARDER</button>
+      <button class="pause-btn save-and-quit" onclick="saveBedroomAndQuit()">💾 SAUVEGARDER ET QUITTER</button>
+      <button class="pause-btn quit" onclick="bedroomQuitWithoutSaving()">✕ QUITTER SANS SAUVEGARDER</button>
       <button class="pause-btn" style="background:rgba(80,0,120,0.15);border-color:rgba(180,0,255,0.35);color:#cc88ff;margin-top:10px;font-size:8px;" onclick="document.getElementById('bedroom-pause-overlay').style.display='none';openCheatModal('bedroom')">🔑 CODE SECRET</button>
     </div>
   </div>
@@ -2280,13 +2285,15 @@
     </div>
   </div>
 
-  <!-- Pause salle de bain (modal réutilisée visuellement) -->
+  <!-- Pause salle de bain -->
   <div id="bath-pause-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
-    <div style="background:#0a1828;border:2px solid #4fc3f7;border-radius:16px;padding:32px;text-align:center;min-width:300px;">
-      <div style="font-family:var(--pixel);font-size:11px;color:#4fc3f7;margin-bottom:20px;">⏸ PAUSE</div>
-      <button class="pause-btn" onclick="resumeBath()">▶ REPRENDRE</button>
-      <button class="pause-btn" onclick="saveBathAndContinue()">💾 SAUVEGARDER</button>
-      <button class="pause-btn" onclick="saveBathAndQuit()" style="color:#ff8888;border-color:#ff4444">🚪 QUITTER</button>
+    <div class="modal-box" style="border-color:#4fc3f7;background:#0a1828;text-align:center;">
+      <div class="modal-title" style="color:#4fc3f7;">⏸ PAUSE</div>
+      <div class="pause-save-name" id="bath-pause-save-label"></div>
+      <button class="pause-btn resume" onclick="resumeBath()">▶ REPRENDRE</button>
+      <button class="pause-btn save-and-continue" onclick="saveBathAndContinue()">💾 SAUVEGARDER</button>
+      <button class="pause-btn save-and-quit" onclick="saveBathAndQuit()">💾 SAUVEGARDER ET QUITTER</button>
+      <button class="pause-btn quit" onclick="bathQuitWithoutSaving()">✕ QUITTER SANS SAUVEGARDER</button>
       <button class="pause-btn" style="background:rgba(80,0,120,0.15);border-color:rgba(180,0,255,0.35);color:#cc88ff;margin-top:10px;font-size:8px;" onclick="document.getElementById('bath-pause-overlay').style.display='none';openCheatModal('bath')">🔑 CODE SECRET</button>
     </div>
   </div>
@@ -2969,7 +2976,7 @@ function addPoints(n) {
 }
 
 function checkWin() {
-  if (state.points >= WIN_THRESHOLD) {
+  if (state.totalPoints >= WIN_THRESHOLD) {
     clearAllIntervals();
     state.gameRunning = false;
     clearFallingBlades();
@@ -4986,6 +4993,8 @@ function showBathEventNotif(ev) {
 function openBathPause() {
   if (!bathState.gameRunning) return;
   bathState.gameRunning = false;
+  const label = document.getElementById('bath-pause-save-label');
+  if (label) label.textContent = bathState.pseudo ? `👤 ${bathState.pseudo}` : '';
   document.getElementById('bath-pause-overlay').style.display = 'flex';
 }
 
@@ -5009,6 +5018,14 @@ function saveBathAndContinue() {
 
 function saveBathAndQuit() {
   saveBathAndContinue();
+  stopBathGame();
+  clearBathProducts();
+  showScreen('menu');
+}
+
+function bathQuitWithoutSaving() {
+  if (!confirm('Quitter sans sauvegarder ? Ta progression depuis la dernière sauvegarde sera perdue !')) return;
+  document.getElementById('bath-pause-overlay').style.display = 'none';
   stopBathGame();
   clearBathProducts();
   showScreen('menu');
@@ -5787,6 +5804,8 @@ function toggleBedroomShop() {
 function openBedroomPause() {
   if (!bedroomState.gameRunning) return;
   bedroomState.gameRunning = false;
+  const label = document.getElementById('bedroom-pause-save-label');
+  if (label) label.textContent = bedroomState.pseudo ? `👤 ${bedroomState.pseudo}` : '';
   const ov = document.getElementById('bedroom-pause-overlay');
   ov.style.display = 'flex';
 }
@@ -5797,7 +5816,25 @@ function resumeBedroom() {
   scheduleDiscordCall();
 }
 
+function saveBedroomAndContinue() {
+  try {
+    localStorage.setItem('tgc_bedroom_save', JSON.stringify({
+      points: bedroomState.points, totalPoints: bedroomState.totalPoints,
+      upgrades: bedroomState.upgrades, pseudo: bedroomState.pseudo
+    }));
+  } catch(e) {}
+  resumeBedroom();
+}
+
 function saveBedroomAndQuit() {
+  stopBedroomGame();
+  document.getElementById('bedroom-pause-overlay').style.display = 'none';
+  showScreen('menu');
+  resetGame();
+}
+
+function bedroomQuitWithoutSaving() {
+  if (!confirm('Quitter sans sauvegarder ? Ta progression depuis la dernière sauvegarde sera perdue !')) return;
   stopBedroomGame();
   document.getElementById('bedroom-pause-overlay').style.display = 'none';
   showScreen('menu');
