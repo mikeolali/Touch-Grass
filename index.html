@@ -1320,7 +1320,7 @@
   /* ===== SYSTÈME DE BADGES ===== */
   #badge-btn {
     position: fixed;
-    bottom: 16px;
+    top: 16px;
     left: 16px;
     z-index: 500;
     font-family: var(--pixel);
@@ -1336,6 +1336,25 @@
     display: none;
   }
   #badge-btn:hover { border-color: var(--gold); background: rgba(30,20,0,0.95); }
+
+  #lb-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 500;
+    font-family: var(--pixel);
+    font-size: 8px;
+    background: rgba(10,10,20,0.9);
+    border: 2px solid rgba(255,179,0,0.5);
+    color: #ffb300;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(6px);
+    display: none;
+  }
+  #lb-btn:hover { border-color: #ffb300; background: rgba(30,20,0,0.95); }
   #badge-btn .badge-count {
     background: #ff4444;
     color: #fff;
@@ -1459,6 +1478,52 @@
     margin: 14px 0 8px;
     padding-bottom: 4px;
     border-bottom: 1px solid rgba(255,215,0,0.1);
+  }
+
+  /* ===== CLASSEMENT MONDIAL ===== */
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,179,0,0.12);
+    transition: background 0.15s;
+  }
+  .lb-row:hover { background: rgba(255,179,0,0.06); }
+  .lb-row.lb-top1 { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.4); }
+  .lb-row.lb-top2 { background: rgba(192,192,192,0.07); border-color: rgba(192,192,192,0.3); }
+  .lb-row.lb-top3 { background: rgba(205,127,50,0.07); border-color: rgba(205,127,50,0.3); }
+  .lb-rank {
+    font-family: var(--pixel);
+    font-size: 11px;
+    min-width: 32px;
+    text-align: center;
+  }
+  .lb-pseudo {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 700;
+    color: #e8e8e8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lb-value {
+    font-family: var(--pixel);
+    font-size: 11px;
+    color: #ffb300;
+    white-space: nowrap;
+  }
+  .lb-badges-count {
+    font-size: 12px;
+    color: #aaa;
+    white-space: nowrap;
+  }
+  .lb-tab-active {
+    background: rgba(255,179,0,0.18) !important;
+    color: #ffb300 !important;
   }
 </style>
 </head>
@@ -1599,7 +1664,7 @@
   <button class="menu-btn saves" onclick="openModal('saves')">💾 SAUVEGARDES</button>
   <button class="menu-btn settings" onclick="openModal('settings')">⚙ PARAMÈTRES</button>
   <button class="menu-btn credits" onclick="openModal('credits')">★ CRÉDITS</button>
-  <button class="menu-btn" style="background:rgba(255,215,0,0.07);border-color:rgba(255,215,0,0.35);color:var(--gold);width:280px;padding:16px 0;font-family:var(--pixel);font-size:10px;border-radius:8px;cursor:pointer;border:2px solid;text-align:center;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,215,0,0.18)'" onmouseout="this.style.background='rgba(255,215,0,0.07)'" onclick="openBadgesModal()">🏅 COLLECTION DE BADGES</button>
+  <!-- badges + leaderboard en haut gauche/droite du menu via les boutons fixes -->
 
   <!-- Bonhomme Tutoriel (menu, gauche) -->
   <div id="tuto-guy-menu" style="position:absolute;bottom:0;left:24px;display:flex;flex-direction:column;align-items:center;z-index:50;">
@@ -1941,8 +2006,11 @@
   <button class="btn-start" onclick="showScreen('menu'); resetGame();">▶ REJOUER DEPUIS LE DÉBUT</button>
 </div>
 
-<!-- ===== BADGE BUTTON ===== -->
+<!-- ===== BADGE BUTTON (haut gauche) ===== -->
 <button id="badge-btn" onclick="openBadgesModal()">🏅 BADGES <span class="badge-count" id="badge-new-count" style="display:none">0</span></button>
+
+<!-- ===== LEADERBOARD BUTTON (haut droite) ===== -->
+<button id="lb-btn" onclick="openLeaderboard()" style="display:none;">🏆 SCORES</button>
 
 <!-- ===== BADGE UNLOCK NOTIF ===== -->
 <div id="badge-unlock-notif">
@@ -2466,6 +2534,41 @@
   </div>
 </div>
 
+<!-- CLASSEMENT MONDIAL -->
+<div class="modal-overlay" id="modal-leaderboard">
+  <div class="modal-box" style="max-width:620px;width:95vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;background:#0a0f0a;border-color:#ffb300;">
+    <div class="modal-title" style="color:#ffb300;font-size:12px;letter-spacing:2px;">🏆 CLASSEMENT MONDIAL</div>
+    <div style="font-size:12px;color:#777;text-align:center;margin-bottom:14px;font-style:italic;">Les meilleurs joueurs de Touch Grass Clicker</div>
+
+    <!-- Onglets -->
+    <div style="display:flex;gap:0;margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,179,0,0.3);">
+      <button id="lb-tab-total" onclick="switchLbTab('total')" style="flex:1;padding:9px 4px;font-family:var(--pixel);font-size:8px;background:rgba(255,179,0,0.18);border:none;color:#ffb300;cursor:pointer;border-right:1px solid rgba(255,179,0,0.2);">🌟 TOTAL PTS</button>
+      <button id="lb-tab-pps" onclick="switchLbTab('pps')" style="flex:1;padding:9px 4px;font-family:var(--pixel);font-size:8px;background:none;border:none;color:#777;cursor:pointer;border-right:1px solid rgba(255,179,0,0.2);">⚡ PTS/SEC</button>
+      <button id="lb-tab-badges" onclick="switchLbTab('badges')" style="flex:1;padding:9px 4px;font-family:var(--pixel);font-size:8px;background:none;border:none;color:#777;cursor:pointer;">🏅 BADGES</button>
+    </div>
+
+    <!-- Contenu -->
+    <div id="lb-content" style="flex:1;overflow-y:auto;min-height:200px;max-height:50vh;">
+      <div id="lb-loading" style="text-align:center;padding:40px;color:#555;font-style:italic;">Chargement du classement...</div>
+      <div id="lb-rows" style="display:none;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <!-- Soumettre son score -->
+    <div id="lb-submit-section" style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,179,0,0.15);">
+      <div style="font-family:var(--pixel);font-size:8px;color:#ffb300;margin-bottom:8px;text-align:center;">📤 SOUMETTRE MON SCORE</div>
+      <div id="lb-submit-msg" style="font-size:12px;color:#888;text-align:center;margin-bottom:8px;font-style:italic;" ></div>
+      <div id="lb-submit-form" style="display:flex;flex-direction:column;gap:8px;">
+        <select id="lb-save-select" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,179,0,0.3);color:#fff;padding:9px 12px;border-radius:8px;font-family:var(--main);font-size:14px;outline:none;">
+          <option value="">— Choisir une sauvegarde —</option>
+        </select>
+        <button onclick="submitScoreToLeaderboard()" style="font-family:var(--pixel);font-size:9px;background:rgba(255,179,0,0.15);border:2px solid #ffb300;color:#ffb300;padding:12px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,179,0,0.3)'" onmouseout="this.style.background='rgba(255,179,0,0.15)'">🏆 ENVOYER MON SCORE</button>
+      </div>
+    </div>
+
+    <button class="modal-close" style="margin-top:12px;background:rgba(255,179,0,0.08);border-color:rgba(255,179,0,0.35);color:#ffb300;" onclick="closeModal('leaderboard')">FERMER</button>
+  </div>
+</div>
+
 <!-- Notification météo -->
 <div id="weather-notif">
   <span class="wn-icon" id="wn-icon"></span>
@@ -2704,7 +2807,7 @@ function stopMenuEmojis() {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
-  if (name === 'menu') { pickSplash(); startMenuEmojis(); Audio.play('menu'); }
+  if (name === 'menu') { pickSplash(); startMenuEmojis(); Audio.play('menu'); const lbB = document.getElementById('lb-btn'); if(lbB) lbB.style.display='block'; }
   else if (name === 'win') { Audio.stop(1); setTimeout(() => Audio.sfx('win'), 600); }
   else if (name === 'win2') { /* musique gérée dans checkBathWin */ }
   else if (name === 'win3') { stopBedroomGame(); }
@@ -6799,14 +6902,253 @@ const _badgeObserver = new MutationObserver(() => {
   const bathActive = document.getElementById('screen-bath') && document.getElementById('screen-bath').classList.contains('active');
   const bedActive = document.getElementById('screen-bedroom') && document.getElementById('screen-bedroom').classList.contains('active');
   const tissueActive = document.getElementById('screen-tissue') && document.getElementById('screen-tissue').classList.contains('active');
+  const menuActive = document.getElementById('screen-menu') && document.getElementById('screen-menu').classList.contains('active');
   const onPlayScreen = gameActive || bathActive || bedActive || tissueActive;
-  if (onPlayScreen && Object.keys(earnedBadges).length > 0) {
+  const showBtns = onPlayScreen || menuActive;
+
+  if (showBtns && Object.keys(earnedBadges).length > 0) {
     btn.style.display = 'flex';
-  } else if (!onPlayScreen) {
+  } else if (!showBtns) {
     btn.style.display = 'none';
+  }
+  // Bouton classement — toujours visible sur menu et écrans de jeu
+  const lbBtn = document.getElementById('lb-btn');
+  if (lbBtn) {
+    lbBtn.style.display = showBtns ? 'block' : 'none';
   }
 });
 _badgeObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+
+// =====================================================
+// ===== CLASSEMENT MONDIAL — LEADERBOARD (JSONBin) ===
+// =====================================================
+
+const JSONBIN_BIN_ID = '6a0c0dfdee5a733b12e23d8a';
+const JSONBIN_ACCESS_KEY = '$2a$10$9sXfjAGr60kLvymdPz/7aO76sV3OKBkn9yPswXmH8UbjSL4cVh7ai';
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
+let lbCurrentTab = 'total';
+let lbData = [];
+
+async function jsonbinGet() {
+  const res = await fetch(JSONBIN_URL + '/latest', {
+    method: 'GET',
+    headers: {
+      'X-Access-Key': JSONBIN_ACCESS_KEY,
+      'X-Bin-Meta': 'false'
+    }
+  });
+  if (!res.ok) throw new Error('GET failed ' + res.status);
+  const data = await res.json();
+  return data.record || data || { scores: [] };
+}
+
+async function jsonbinSet(record) {
+  const res = await fetch(JSONBIN_URL, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Access-Key': JSONBIN_ACCESS_KEY,
+      'X-Bin-Versioning': 'false'
+    },
+    body: JSON.stringify(record)
+  });
+  if (!res.ok) throw new Error('PUT failed ' + res.status);
+  return await res.json();
+}
+
+function openLeaderboard() {
+  populateLbSaveSelect();
+  openModal('leaderboard');
+  loadAndRenderLeaderboard();
+}
+
+function switchLbTab(tab) {
+  lbCurrentTab = tab;
+  ['total','pps','badges'].forEach(t => {
+    const btn = document.getElementById('lb-tab-' + t);
+    if (!btn) return;
+    if (t === tab) {
+      btn.classList.add('lb-tab-active');
+      btn.style.color = '#ffb300';
+      btn.style.background = 'rgba(255,179,0,0.18)';
+    } else {
+      btn.classList.remove('lb-tab-active');
+      btn.style.color = '#777';
+      btn.style.background = 'none';
+    }
+  });
+  renderLbRows(lbData);
+}
+
+function populateLbSaveSelect() {
+  const sel = document.getElementById('lb-save-select');
+  if (!sel) return;
+  const saves = getAllSaves();
+  const keys = Object.keys(saves);
+  sel.innerHTML = '<option value="">— Choisir une sauvegarde —</option>';
+  keys.forEach(id => {
+    const s = saves[id];
+    const totalPts = Math.floor(s.totalPoints || 0);
+    const badgeCount = Object.keys(JSON.parse(localStorage.getItem('tgc_badges_v1') || '{}')).length;
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = `${s.pseudo} — ${formatNum(totalPts)} pts — ${s.saveName}`;
+    sel.appendChild(opt);
+  });
+
+  const msg = document.getElementById('lb-submit-msg');
+  if (keys.length === 0) {
+    msg.textContent = 'Aucune sauvegarde. Lance une partie d\'abord !';
+  } else {
+    msg.textContent = 'Soumet ton meilleur score sur le classement mondial 🌍';
+  }
+}
+
+async function loadAndRenderLeaderboard() {
+  const loadingEl = document.getElementById('lb-loading');
+  const rowsEl = document.getElementById('lb-rows');
+  if (loadingEl) { loadingEl.style.display = 'block'; loadingEl.textContent = 'Chargement du classement...'; }
+  if (rowsEl) rowsEl.style.display = 'none';
+
+  try {
+    const record = await jsonbinGet();
+    lbData = record.scores || [];
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (rowsEl) rowsEl.style.display = 'flex';
+    renderLbRows(lbData);
+  } catch(e) {
+    if (loadingEl) { loadingEl.style.display = 'block'; loadingEl.textContent = 'Erreur de chargement. Vérifie ta connexion.'; }
+  }
+}
+
+function renderLbRows(entries) {
+  const rowsEl = document.getElementById('lb-rows');
+  if (!rowsEl) return;
+  rowsEl.innerHTML = '';
+
+  let sorted = [...entries];
+  if (lbCurrentTab === 'total') {
+    sorted.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+  } else if (lbCurrentTab === 'pps') {
+    sorted.sort((a, b) => (b.bestPps || 0) - (a.bestPps || 0));
+  } else {
+    sorted.sort((a, b) => (b.badgeCount || 0) - (a.badgeCount || 0));
+  }
+
+  if (sorted.length === 0) {
+    rowsEl.innerHTML = '<div style="text-align:center;padding:30px;color:#555;font-style:italic;">Aucun joueur dans le classement.<br>Sois le premier à soumettre ton score !</div>';
+    return;
+  }
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const topClasses = ['lb-top1', 'lb-top2', 'lb-top3'];
+
+  sorted.slice(0, 100).forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.className = 'lb-row ' + (topClasses[i] || '');
+
+    const rankEl = document.createElement('div');
+    rankEl.className = 'lb-rank';
+    rankEl.textContent = medals[i] || ('#' + (i + 1));
+    if (i === 0) rankEl.style.color = '#FFD700';
+    else if (i === 1) rankEl.style.color = '#C0C0C0';
+    else if (i === 2) rankEl.style.color = '#CD7F32';
+    else rankEl.style.color = '#666';
+
+    const pseudoEl = document.createElement('div');
+    pseudoEl.className = 'lb-pseudo';
+    pseudoEl.textContent = escHtml(entry.pseudo || 'Anonyme');
+
+    const valueEl = document.createElement('div');
+    if (lbCurrentTab === 'total') {
+      valueEl.className = 'lb-value';
+      valueEl.textContent = formatNum(Math.floor(entry.totalPoints || 0)) + ' pts';
+    } else if (lbCurrentTab === 'pps') {
+      valueEl.className = 'lb-value';
+      valueEl.textContent = formatNum(Math.round(entry.bestPps || 0)) + '/sec';
+    } else {
+      valueEl.className = 'lb-badges-count';
+      valueEl.textContent = '🏅 ' + (entry.badgeCount || 0) + ' badges';
+    }
+
+    // Sub-info
+    const infoEl = document.createElement('div');
+    infoEl.style.cssText = 'font-size:10px;color:#555;white-space:nowrap;';
+    if (lbCurrentTab === 'total') {
+      infoEl.textContent = '🏅 ' + (entry.badgeCount || 0);
+    } else if (lbCurrentTab === 'pps') {
+      infoEl.textContent = formatNum(Math.floor(entry.totalPoints || 0)) + ' pts';
+    } else {
+      infoEl.textContent = formatNum(Math.floor(entry.totalPoints || 0)) + ' pts';
+    }
+
+    row.appendChild(rankEl);
+    row.appendChild(pseudoEl);
+    row.appendChild(infoEl);
+    row.appendChild(valueEl);
+    rowsEl.appendChild(row);
+  });
+}
+
+async function submitScoreToLeaderboard() {
+  const sel = document.getElementById('lb-save-select');
+  const saveId = sel ? sel.value : '';
+  if (!saveId) { alert('Choisis une sauvegarde à soumettre !'); return; }
+
+  const saves = getAllSaves();
+  const save = saves[saveId];
+  if (!save) { alert('Sauvegarde introuvable.'); return; }
+
+  const msg = document.getElementById('lb-submit-msg');
+  if (msg) { msg.textContent = '⏳ Envoi en cours...'; msg.style.color = '#aaa'; }
+
+  const badgesRaw = localStorage.getItem('tgc_badges_v1') || '{}';
+  let badgeCount = 0;
+  try { badgeCount = Object.keys(JSON.parse(badgesRaw)).length; } catch(e) {}
+
+  const pseudo = (save.pseudo || 'Anonyme').slice(0, 20);
+  const totalPoints = Math.floor(save.totalPoints || 0);
+  const pps = Math.round(save.pointsPerSec || 0);
+
+  try {
+    const record = await jsonbinGet();
+    let scores = record.scores || [];
+
+    // Cherche une entrée existante pour ce pseudo
+    const existingIdx = scores.findIndex(s => s.pseudo.toLowerCase() === pseudo.toLowerCase());
+
+    const newEntry = {
+      pseudo,
+      totalPoints,
+      bestPps: pps,
+      badgeCount,
+      date: new Date().toLocaleDateString('fr-FR')
+    };
+
+    if (existingIdx >= 0) {
+      const existing = scores[existingIdx];
+      // Garde le meilleur de chaque stat
+      newEntry.totalPoints = Math.max(totalPoints, existing.totalPoints || 0);
+      newEntry.bestPps = Math.max(pps, existing.bestPps || 0);
+      newEntry.badgeCount = Math.max(badgeCount, existing.badgeCount || 0);
+      scores[existingIdx] = newEntry;
+    } else {
+      scores.push(newEntry);
+    }
+
+    // Garde max 200 entrées (les meilleures par totalPoints)
+    scores.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+    scores = scores.slice(0, 200);
+
+    await jsonbinSet({ scores });
+
+    if (msg) { msg.textContent = '🎉 Score soumis ! Tu apparais dans le classement.'; msg.style.color = '#4CAF50'; }
+    await loadAndRenderLeaderboard();
+  } catch(e) {
+    if (msg) { msg.textContent = '❌ Erreur lors de la soumission. Réessaie.'; msg.style.color = '#f44336'; }
+  }
+}
 </script>
 </body>
 </html>
