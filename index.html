@@ -6911,10 +6911,10 @@ const _badgeObserver = new MutationObserver(() => {
   } else if (!showBtns) {
     btn.style.display = 'none';
   }
-  // Bouton classement — toujours visible sur menu et écrans de jeu
+  // Bouton classement — visible uniquement sur le menu
   const lbBtn = document.getElementById('lb-btn');
   if (lbBtn) {
-    lbBtn.style.display = showBtns ? 'block' : 'none';
+    lbBtn.style.display = menuActive ? 'block' : 'none';
   }
 });
 _badgeObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
